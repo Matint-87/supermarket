@@ -1,0 +1,794 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+  ─────────── پالت رنگی برند: آبی + نعنایی + کِرِم ───────────
+  #3368A0 (اصلی) · #66A3BF (ثانویه) · #C8DFDB (نعنایی ملایم) · #F2EFE7 (زمینه‌ی کِرِم)
+  کل سایت از کلاس‌های green-* و slate-* استفاده می‌کنه؛ برای همین فقط مقدارها اینجا عوض شدن
+  (اسم green-* موند تا لازم نباشه تک‌تک فایل‌ها دست بخورن؛ الان یعنی «رنگ برند»).
+  رنگ‌های معنایی (موفقیت=emerald، خطا=red، تخفیف=orange) جدا موندن.
+*/
+@theme {
+  --color-green-50: #f1f7f9;
+  --color-green-100: #e0eeee;
+  --color-green-200: #c8dfdb;
+  --color-green-300: #9bc1cd;
+  --color-green-400: #66a3bf;
+  --color-green-500: #4d85af;
+  --color-green-600: #3368a0;
+  --color-green-700: #2a5786;
+  --color-green-800: #22466b;
+  --color-green-900: #1b3853;
+  --color-green-950: #0f2033;
+
+  --color-slate-50: #f2efe7;
+  --color-slate-100: #e9e5d9;
+  --color-slate-200: #dcd7c8;
+  --color-slate-300: #c7c1af;
+
+  /* سایه‌های نرم برای کارت‌ها */
+  --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 6px 20px -6px rgb(15 23 42 / 0.08);
+  --shadow-pop: 0 2px 6px rgb(15 23 42 / 0.06), 0 16px 40px -12px rgb(15 23 42 / 0.18);
+  --shadow-brand: 0 8px 20px -8px rgb(51 104 160 / 0.5);
+
+  /* انیمیشن ورود آیتم‌ها (مثلاً وقتی دسته‌ی بعدیِ لیست لود می‌شه) */
+  --animate-fade-up: fade-up 0.35s ease-out both;
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/*
+  فونت شبنم — هر وزن @font-face جدا دارد.
+  (قبلاً چند src پشت‌سرهم توی یک @font-face بود و فقط آخری اعمال می‌شد؛ یعنی همه‌ی وزن‌ها Medium بودند.)
+*/
+@font-face {
+  font-family: Number;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/font/Shabnam-FD-UqE7V9cL.woff2) format("woff2");
+}
+@font-face {
+  font-family: Number;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/font/Shabnam-Medium-FD-CCYWnpK7.woff2) format("woff2");
+}
+@font-face {
+  font-family: Number;
+  font-weight: 700 900;
+  font-display: swap;
+  src: url(/font/Shabnam-Bold-FD-B4xNpIWI.woff2) format("woff2");
+}
+@font-face {
+  font-family: fontello;
+  font-display: swap;
+  src: url(/font/fontello-Cqw191qV.woff2) format("woff2");
+}
+
+:root {
+  --fontFamily: Number;
+  /* سطح کارت‌ها/ورودی‌ها (همون bg-white)؛ توی تم تاریک عوض می‌شه */
+  --surface: #ffffff;
+}
+
+/*
+  ─────────── توکن‌های shadcn/ui (نگاشت‌شده به پالت برند) ───────────
+  مقدارها عمداً hex هستن (نه var(--color-*)) تا همیشه روی :root در دسترس باشن.
+  شعاع‌ها (--radius-*) عمداً override نشدن تا rounded-xl و بقیه‌ی کلاس‌های فعلی سایت تغییر نکنن.
+*/
+:root {
+  --background: #f2efe7;
+  --foreground: #1e293b;
+  --card: #ffffff;
+  --card-foreground: #1e293b;
+  --popover: #ffffff;
+  --popover-foreground: #1e293b;
+  --primary: #3368a0;
+  --primary-foreground: #ffffff;
+  --secondary: #e9e5d9;
+  --secondary-foreground: #334155;
+  --muted: #e9e5d9;
+  --muted-foreground: #64748b;
+  --accent: #e0eeee;
+  --accent-foreground: #1b3853;
+  --destructive: #dc2626;
+  --border: #dcd7c8;
+  --input: #dcd7c8;
+  --ring: #3368a0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/*
+  ─────────── تم تاریک ───────────
+  کلاس `dark` روی <html> قرار می‌گیره (اسکریپت داخل layout + ThemeProvider؛ انتخاب کاربر: سیستم/روشن/تاریک).
+  ایده: کل سایت از پالت‌های slate-* و green-* (رنگ برند) و رنگ‌های معنایی (red/amber/emerald/…) استفاده می‌کنه؛
+  پس فقط مقدار همین متغیرها رو برعکس/تیره می‌کنیم و نیازی به dark: توی تک‌تک کامپوننت‌ها نیست.
+  استثناها (جایی که یک رنگ هم پس‌زمینه‌ی دکمه‌ست هم رنگ متن) پایین‌تر با قاعده‌ی جدا حل شدن.
+  داخل @media screen هست تا چاپ فاکتور همیشه روشن و بدون جوهر اضافه بمونه.
+*/
+@media screen {
+  html.dark {
+    color-scheme: dark;
+    --surface: #131b27;
+
+    /* خاکستری‌ها: ۵۰ = زمینه‌ی صفحه … ۹۵۰ = پررنگ‌ترین متن */
+    --color-slate-50: #0d131c;
+    --color-slate-100: #1a2332;
+    --color-slate-200: #263247;
+    --color-slate-300: #36455d;
+    --color-slate-400: #6f7e95;
+    --color-slate-500: #8f9db1;
+    --color-slate-600: #b0bccc;
+    --color-slate-700: #ccd5e1;
+    --color-slate-800: #e4e9f1;
+    --color-slate-900: #f1f4f9;
+    --color-slate-950: #f8fafc;
+
+    /* رنگ برند: فقط سطح‌های روشن (پس‌زمینه‌ی ملایم) تیره می‌شن؛ ۴۰۰ تا ۹۵۰ برای دکمه‌ها همون می‌مونه */
+    --color-green-50: #12263a;
+    --color-green-100: #17314a;
+    --color-green-200: #1f4260;
+    --color-green-300: #2e5f86;
+
+    /* رنگ‌های معنایی: پس‌زمینه‌های ملایم → تیره‌ی رنگی */
+    --color-red-50: #2a1417;
+    --color-red-100: #3a1a1f;
+    --color-red-200: #5a252c;
+    --color-amber-50: #2a2010;
+    --color-amber-100: #3a2c12;
+    --color-amber-200: #594419;
+    --color-orange-50: #2b1a10;
+    --color-orange-100: #3d2413;
+    --color-orange-200: #5c3718;
+    --color-rose-50: #2b141c;
+    --color-rose-100: #3c1a25;
+    --color-rose-200: #5c2434;
+    --color-emerald-50: #0f2a22;
+    --color-emerald-100: #14392d;
+    --color-emerald-200: #1c5240;
+    --color-sky-50: #0e2433;
+    --color-sky-100: #133248;
+    --color-sky-200: #1b4a68;
+    --color-violet-50: #1f1833;
+    --color-violet-100: #2a2147;
+    --color-violet-200: #3f3368;
+
+    /* توکن‌های shadcn */
+    --background: #0d131c;
+    --foreground: #e4e9f1;
+    --card: #131b27;
+    --card-foreground: #e4e9f1;
+    --popover: #131b27;
+    --popover-foreground: #e4e9f1;
+    --secondary: #1a2332;
+    --secondary-foreground: #ccd5e1;
+    --muted: #1a2332;
+    --muted-foreground: #8f9db1;
+    --accent: #14283b;
+    --accent-foreground: #a5cde6;
+    --border: #263247;
+    --input: #263247;
+    --ring: #4d85af;
+  }
+
+  /* سطح کارت‌ها و ورودی‌ها (bg-white) */
+  html.dark .bg-white,
+  html.dark .open\:bg-white[open],
+  html.dark .focus\:bg-white:focus {
+    background-color: var(--surface);
+  }
+  @media (min-width: 64rem) {
+    html.dark .lg\:bg-white {
+      background-color: var(--surface);
+    }
+  }
+  /* نیمه‌شفاف‌ها (هدر شیشه‌ای، نوار پایین، اسکلتون) */
+  html.dark .bg-white\/95 { background-color: rgb(19 27 39 / 0.95); }
+  html.dark .bg-white\/90 { background-color: rgb(19 27 39 / 0.9); }
+  html.dark .bg-white\/85 { background-color: rgb(19 27 39 / 0.85); }
+  html.dark .bg-white\/70 { background-color: rgb(19 27 39 / 0.7); }
+  html.dark .bg-white\/60 { background-color: rgb(255 255 255 / 0.06); }
+  html.dark .bg-white\/40 { background-color: rgb(255 255 255 / 0.05); }
+  html.dark .ring-white { --tw-ring-color: var(--surface); }
+  html.dark .ring-black\/5 { --tw-ring-color: rgb(255 255 255 / 0.08); }
+
+  /* متن‌های رنگی: همون رنگ برای دکمه (پس‌زمینه) هم استفاده شده، پس فقط «متن» روشن می‌شه */
+  html.dark .text-green-600,
+  html.dark .text-green-700,
+  html.dark .hover\:text-green-700:hover,
+  html.dark .group:hover .group-hover\:text-green-700 { color: #86bbdc; }
+  html.dark .text-green-800,
+  html.dark .text-green-900,
+  html.dark .hover\:text-green-800:hover,
+  html.dark .group:hover .group-hover\:text-green-800,
+  html.dark .data-highlighted\:text-green-800[data-highlighted],
+  html.dark .data-\[state\=checked\]\:text-green-800[data-state="checked"] { color: #a9d0e8; }
+  html.dark .text-green-50,
+  html.dark .text-green-50\/90,
+  html.dark .text-green-100,
+  html.dark .text-green-100\/90 { color: #e0eeee; }
+  html.dark .text-red-500,
+  html.dark .text-red-600,
+  html.dark .hover\:text-red-600:hover { color: #f87171; }
+  html.dark .text-red-700,
+  html.dark .hover\:text-red-700:hover { color: #fca5a5; }
+  html.dark .text-rose-500,
+  html.dark .text-rose-600,
+  html.dark .hover\:text-rose-500:hover,
+  html.dark .hover\:text-rose-600:hover { color: #fb7185; }
+  html.dark .text-rose-700 { color: #fda4af; }
+  html.dark .text-amber-600,
+  html.dark .hover\:text-amber-600:hover { color: #fbbf24; }
+  html.dark .text-amber-700 { color: #fcd34d; }
+  html.dark .text-amber-800 { color: #fde68a; }
+  html.dark .text-orange-700,
+  html.dark .hover\:text-orange-700:hover { color: #fdba74; }
+  html.dark .text-emerald-600 { color: #34d399; }
+  html.dark .text-emerald-700 { color: #6ee7b7; }
+  html.dark .text-emerald-800 { color: #a7f3d0; }
+  html.dark .text-sky-600 { color: #38bdf8; }
+  html.dark .text-sky-700 { color: #7dd3fc; }
+  html.dark .text-violet-600 { color: #a78bfa; }
+  html.dark .text-violet-700 { color: #c4b5fd; }
+  html.dark .text-violet-800 { color: #ddd6fe; }
+
+  /* دکمه‌های سفیدِ روی اسلایدر/نقشه: آیکون‌شون روشن بمونه وقتی hover می‌شن (bg برند) */
+  html.dark .hover\:text-white:hover { color: #fff; }
+
+  /* چک‌باکس بومی (فقط حالت تیک‌نخورده) */
+  html.dark input[type="checkbox"]:not(:checked) { background-color: var(--surface); }
+
+  /* انتخاب متن */
+  html.dark ::selection { background: #2e5f86; color: #fff; }
+
+  /* toast */
+  html.dark .Toastify__toast.sabah-toast {
+    background: var(--surface);
+    color: #e4e9f1;
+    border-color: #263247;
+  }
+
+  /* عکس‌های محصول روی کارت تیره خیلی خیره‌کننده نباشن */
+  html.dark img { filter: brightness(0.92); }
+}
+
+
+/*
+  ═══════════ پالت‌های رنگی قابل انتخاب از پنل مدیریت ═══════════
+  پالت فعال با data-palette روی <html> مشخص می‌شه (layout از دیتابیس می‌خونه). بدون این attribute همون پالت پیش‌فرض (آبی/کِرِم) بالاست.
+  هر پالت: ۱) نسخه‌ی روشن (متغیرهای green-* = رنگ برند، slate-* = زمینه/متن/خط، و توکن‌های shadcn)
+           ۲) نسخه‌ی تاریک مخصوص خودش (داخل @media screen تا چاپ فاکتور همیشه روشن بمونه)
+  برای اضافه‌کردن پالت جدید: یک بلوک مثل این‌ها + یک آیتم توی lib/palettes.js.
+*/
+html[data-palette="sea"] {
+  --color-green-50: #f2f8ee;
+  --color-green-100: #e6f2dd;
+  --color-green-200: #cce3cb;
+  --color-green-300: #b1d3b9;
+  --color-green-400: #88bda4;
+  --color-green-500: #77a895;
+  --color-green-600: #659287;
+  --color-green-700: #53796f;
+  --color-green-800: #425f58;
+  --color-green-900: #334a45;
+  --color-green-950: #1f2d2a;
+  --color-slate-50: #e6f2dd;
+  --color-slate-100: #dbe9d3;
+  --color-slate-200: #cddcc6;
+  --color-slate-300: #b8c9b2;
+  --color-slate-400: #8aa096;
+  --color-slate-500: #6b8278;
+  --color-slate-600: #526a60;
+  --color-slate-700: #3f544b;
+  --color-slate-800: #2c3d36;
+  --color-slate-900: #1d2a25;
+  --color-slate-950: #121b17;
+  --shadow-brand: 0 8px 20px -8px rgb(101 146 135 / 0.5);
+  --background: #e6f2dd;
+  --foreground: #2c3d36;
+  --card-foreground: #2c3d36;
+  --popover-foreground: #2c3d36;
+  --primary: #659287;
+  --secondary: #dbe9d3;
+  --secondary-foreground: #3f544b;
+  --muted: #dbe9d3;
+  --muted-foreground: #6b8278;
+  --accent: #e6f2dd;
+  --accent-foreground: #334a45;
+  --border: #cddcc6;
+  --input: #cddcc6;
+  --ring: #659287;
+}
+html[data-palette="sea"] .Toastify__toast.sabah-toast { border-color: #cddcc6; color: #2c3d36; }
+html[data-palette="earth"] {
+  --color-green-50: #fbf1e6;
+  --color-green-100: #f6e6d6;
+  --color-green-200: #ecd3bb;
+  --color-green-300: #d9ad88;
+  --color-green-400: #c08552;
+  --color-green-500: #a66f47;
+  --color-green-600: #8c5a3c;
+  --color-green-700: #70472f;
+  --color-green-800: #5e3a35;
+  --color-green-900: #4b2e2b;
+  --color-green-950: #2f1b19;
+  --color-slate-50: #fff8f0;
+  --color-slate-100: #f6ebdf;
+  --color-slate-200: #ead9c8;
+  --color-slate-300: #d6bfa8;
+  --color-slate-400: #a08c7d;
+  --color-slate-500: #85705f;
+  --color-slate-600: #6b574a;
+  --color-slate-700: #55443a;
+  --color-slate-800: #3d2f2a;
+  --color-slate-900: #2b201d;
+  --color-slate-950: #1c1412;
+  --shadow-brand: 0 8px 20px -8px rgb(140 90 60 / 0.5);
+  --background: #fff8f0;
+  --foreground: #3d2f2a;
+  --card-foreground: #3d2f2a;
+  --popover-foreground: #3d2f2a;
+  --primary: #8c5a3c;
+  --secondary: #f6ebdf;
+  --secondary-foreground: #55443a;
+  --muted: #f6ebdf;
+  --muted-foreground: #85705f;
+  --accent: #f6e6d6;
+  --accent-foreground: #4b2e2b;
+  --border: #ead9c8;
+  --input: #ead9c8;
+  --ring: #8c5a3c;
+}
+html[data-palette="earth"] .Toastify__toast.sabah-toast { border-color: #ead9c8; color: #3d2f2a; }
+
+@media screen {
+  html[data-palette="sea"].dark {
+    --surface: #16201d;
+    --color-slate-50: #0f1715;
+    --color-slate-100: #1e2b27;
+    --color-slate-200: #2a3b36;
+    --color-slate-300: #3c524b;
+    --color-slate-400: #72877f;
+    --color-slate-500: #93a69e;
+    --color-slate-600: #b1c2ba;
+    --color-slate-700: #ccd8d2;
+    --color-slate-800: #e4ece8;
+    --color-slate-900: #f1f6f3;
+    --color-slate-950: #f8fbf9;
+    --color-green-50: #13231e;
+    --color-green-100: #19302a;
+    --color-green-200: #234238;
+    --color-green-300: #35614f;
+    --background: #0f1715;
+    --foreground: #e4ece8;
+    --card: #16201d;
+    --card-foreground: #e4ece8;
+    --popover: #16201d;
+    --popover-foreground: #e4ece8;
+    --secondary: #1e2b27;
+    --secondary-foreground: #ccd8d2;
+    --muted: #1e2b27;
+    --muted-foreground: #93a69e;
+    --accent: #182a24;
+    --accent-foreground: #b1d3b9;
+    --border: #2a3b36;
+    --input: #2a3b36;
+    --ring: #77a896;
+  }
+  html[data-palette="sea"].dark .bg-white\/95 { background-color: rgb(22 32 29 / 0.95); }
+  html[data-palette="sea"].dark .bg-white\/90 { background-color: rgb(22 32 29 / 0.9); }
+  html[data-palette="sea"].dark .bg-white\/85 { background-color: rgb(22 32 29 / 0.85); }
+  html[data-palette="sea"].dark .bg-white\/70 { background-color: rgb(22 32 29 / 0.7); }
+  html[data-palette="sea"].dark .text-green-600,
+  html[data-palette="sea"].dark .text-green-700,
+  html[data-palette="sea"].dark .hover\:text-green-700:hover,
+  html[data-palette="sea"].dark .group:hover .group-hover\:text-green-700 { color: #9fd0b8; }
+  html[data-palette="sea"].dark .text-green-800,
+  html[data-palette="sea"].dark .text-green-900,
+  html[data-palette="sea"].dark .hover\:text-green-800:hover,
+  html[data-palette="sea"].dark .group:hover .group-hover\:text-green-800,
+  html[data-palette="sea"].dark .data-highlighted\:text-green-800[data-highlighted],
+  html[data-palette="sea"].dark .data-\[state\=checked\]\:text-green-800[data-state="checked"] { color: #bfe0cf; }
+  html[data-palette="sea"].dark .text-green-50,
+  html[data-palette="sea"].dark .text-green-50\/90,
+  html[data-palette="sea"].dark .text-green-100,
+  html[data-palette="sea"].dark .text-green-100\/90 { color: #e6f2dd; }
+  html[data-palette="sea"].dark ::selection { background: #35614f; color: #fff; }
+  html[data-palette="sea"].dark .Toastify__toast.sabah-toast { background: var(--surface); color: #e4ece8; border-color: #2a3b36; }
+
+  html[data-palette="earth"].dark {
+    --surface: #231916;
+    --color-slate-50: #1a1210;
+    --color-slate-100: #2e211d;
+    --color-slate-200: #40302a;
+    --color-slate-300: #5a443a;
+    --color-slate-400: #8c7566;
+    --color-slate-500: #a8917f;
+    --color-slate-600: #c3ad9b;
+    --color-slate-700: #dac8b8;
+    --color-slate-800: #eadcce;
+    --color-slate-900: #f6ede4;
+    --color-slate-950: #fff8f0;
+    --color-green-50: #2a1b16;
+    --color-green-100: #35241c;
+    --color-green-200: #4a3226;
+    --color-green-300: #6b4a37;
+    --background: #1a1210;
+    --foreground: #eadcce;
+    --card: #231916;
+    --card-foreground: #eadcce;
+    --popover: #231916;
+    --popover-foreground: #eadcce;
+    --secondary: #2e211d;
+    --secondary-foreground: #dac8b8;
+    --muted: #2e211d;
+    --muted-foreground: #a8917f;
+    --accent: #2d1f19;
+    --accent-foreground: #e8c5a0;
+    --border: #40302a;
+    --input: #40302a;
+    --ring: #c08552;
+  }
+  html[data-palette="earth"].dark .bg-white\/95 { background-color: rgb(35 25 22 / 0.95); }
+  html[data-palette="earth"].dark .bg-white\/90 { background-color: rgb(35 25 22 / 0.9); }
+  html[data-palette="earth"].dark .bg-white\/85 { background-color: rgb(35 25 22 / 0.85); }
+  html[data-palette="earth"].dark .bg-white\/70 { background-color: rgb(35 25 22 / 0.7); }
+  html[data-palette="earth"].dark .text-green-600,
+  html[data-palette="earth"].dark .text-green-700,
+  html[data-palette="earth"].dark .hover\:text-green-700:hover,
+  html[data-palette="earth"].dark .group:hover .group-hover\:text-green-700 { color: #e0a877; }
+  html[data-palette="earth"].dark .text-green-800,
+  html[data-palette="earth"].dark .text-green-900,
+  html[data-palette="earth"].dark .hover\:text-green-800:hover,
+  html[data-palette="earth"].dark .group:hover .group-hover\:text-green-800,
+  html[data-palette="earth"].dark .data-highlighted\:text-green-800[data-highlighted],
+  html[data-palette="earth"].dark .data-\[state\=checked\]\:text-green-800[data-state="checked"] { color: #efc9a3; }
+  html[data-palette="earth"].dark .text-green-50,
+  html[data-palette="earth"].dark .text-green-50\/90,
+  html[data-palette="earth"].dark .text-green-100,
+  html[data-palette="earth"].dark .text-green-100\/90 { color: #fbe9d7; }
+  html[data-palette="earth"].dark ::selection { background: #6b4a37; color: #fff; }
+  html[data-palette="earth"].dark .Toastify__toast.sabah-toast { background: var(--surface); color: #eadcce; border-color: #40302a; }
+
+}
+
+/* ─────────── react-toastify با ظاهر هماهنگ با سایت ─────────── */
+.Toastify {
+  --toastify-font-family: inherit;
+  --toastify-color-success: #059669;
+  --toastify-color-error: #dc2626;
+  --toastify-color-warning: #d97706;
+  --toastify-color-info: var(--color-green-600);
+  --toastify-toast-min-height: 52px;
+  --toastify-toast-width: min(92vw, 380px);
+}
+.Toastify__toast.sabah-toast {
+  border-radius: 0.875rem;
+  border: 1px solid rgb(220 215 200 / 0.7);
+  box-shadow: var(--shadow-pop);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.75;
+  color: #1e293b;
+  padding: 0.5rem 0.75rem;
+}
+.Toastify__toast-body {
+  font-family: inherit;
+}
+.Toastify__progress-bar {
+  height: 3px;
+}
+
+html {
+  font-family: Number, Tahoma, "Segoe UI", sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+/*
+  سربرگ جدول‌ها: مرورگر پیش‌فرض th رو وسط‌چین می‌کنه ولی td ها راست‌چین (start) هستن؛
+  برای همین عنوان ستون‌ها دقیقاً بالای محتوای خودشون نبودن. اینجا از جدول ارث می‌برن.
+*/
+th {
+  text-align: inherit;
+}
+
+/* هیچ صفحه‌ای نباید روی موبایل افقی اسکرول بخوره (جدول‌ها داخل کانتینر خودشون اسکرول می‌شن) */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+/* متن‌های طولانی (نام محصول، آدرس، کد) از کادرشون بیرون نزنن */
+h1, h2, h3, p, dd, dt, li, label {
+  overflow-wrap: anywhere;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  background-color: var(--color-slate-50);
+  color: var(--color-slate-800);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-green-200);
+  color: var(--color-green-950);
+}
+
+/* اسکرول‌بار همه‌جا مخفیه (خود اسکرول کار می‌کنه، فقط نوارش دیده نمی‌شه) */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/*
+  جدول‌های پنل مدیریت (min-w-[960px] و…) روی لپ‌تاپ‌های کوچیک افقی اسکرول می‌شن؛ وقتی اسکرول‌بار
+  مخفیه کاربر ماوس‌دار هیچ نشونه‌ای از اسکرول‌شدنشون نمی‌بینه. فقط برای کانتینر جدول‌ها یک اسکرول‌بار باریک برمی‌گردونیم.
+*/
+:has(> table) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-slate-300) transparent;
+}
+:has(> table)::-webkit-scrollbar {
+  display: block;
+  height: 8px;
+}
+:has(> table)::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300);
+  border-radius: 9999px;
+}
+
+/*
+  نقشه‌ی لیفلت داخل خودش z-index تا ۱۰۰۰ استفاده می‌کنه (دکمه‌های +/−، پین‌ها)؛ بدون این قاعده
+  موقع اسکرول از روی هدر چسبون (z-100) رد می‌شد. اینجا نقشه یک stacking context جدا می‌گیره.
+*/
+.leaflet-container {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+
+/*
+  چک‌باکس‌های مدرن: به‌جای مربع پیش‌فرض مرورگر، گوشه‌گرد با رنگ برند و تیک سفید.
+  (روی همه‌ی input[type=checkbox] های سایت اعمال می‌شه؛ بدون تغییر در کدها)
+*/
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  cursor: pointer;
+  border: 1.5px solid var(--color-slate-300);
+  border-radius: 0.4rem;
+  background-color: var(--surface, #fff);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 0.8rem;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+}
+input[type="checkbox"]:hover:not(:disabled) {
+  border-color: var(--color-green-500);
+}
+input[type="checkbox"]:active:not(:disabled) {
+  transform: scale(0.92);
+}
+input[type="checkbox"]:checked {
+  border-color: var(--color-green-600);
+  background-color: var(--color-green-600);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
+}
+input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-green-600) 20%, transparent);
+}
+input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/*
+  آیفون وقتی فونت input کمتر از ۱۶px باشه موقع فوکوس صفحه رو زوم می‌کنه (و بعدش زوم می‌مونه).
+  ورودی‌های سایت text-sm (۱۴px) هستن، پس فقط روی دستگاه‌های لمسی ۱۶px می‌شن.
+*/
+@media (hover: none) and (pointer: coarse) {
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* گوشی‌های دارای ناچ در حالت افقی: محتوا زیر ناچ نره (با viewport-fit=cover لازمه) */
+body {
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+}
+
+/* حلقه‌ی فوکوس واضح برای کاربران کیبورد */
+:focus-visible {
+  outline: 2px solid var(--color-green-600);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* چاپ فاکتور: A4 و حفظ رنگ پس‌زمینه‌ی سربرگ جدول */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/*
+  ═══════════ انیمیشن اسکرول و هیرو ═══════════
+  ۱) [data-reveal]  → کامپوننت <Reveal> (components/Reveal.jsx): آیتم موقع رسیدن به صفحه از یک سمت وارد می‌شه
+  ۲) .hero-in       → ورود پله‌ای متن‌های هیرو موقع باز شدن صفحه (فقط CSS، بدون جاوااسکریپت)
+  ۳) .float-y / .parallax-* → حرکت آرام آیکن‌ها و دایره‌های تزئینی هیرو
+  ۴) .banner-in     → ورود بنر (عمداً بدون opacity تا نمایش عکس اصلی صفحه کند نشه)
+  همه‌ی این‌ها با «کاهش حرکت» سیستم خاموش می‌شن؛ بدون جاوااسکریپت هم محتوا همیشه دیده می‌شه.
+*/
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    --reveal-distance: 28px;
+    opacity: 0;
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+      transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+  @media (min-width: 48rem) {
+    [data-reveal] {
+      --reveal-distance: 48px;
+    }
+  }
+  [data-reveal="bottom"] {
+    transform: translate3d(0, var(--reveal-distance), 0);
+  }
+  [data-reveal="top"] {
+    transform: translate3d(0, calc(var(--reveal-distance) * -1), 0);
+  }
+  [data-reveal="left"] {
+    transform: translate3d(calc(var(--reveal-distance) * -1.4), 0, 0);
+  }
+  [data-reveal="right"] {
+    transform: translate3d(calc(var(--reveal-distance) * 1.4), 0, 0);
+  }
+  [data-reveal="zoom"] {
+    transform: scale(0.86);
+  }
+  /* دو attribute → اولویت بیشتر از حالت‌های بالا */
+  [data-reveal][data-in="true"] {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hero-in {
+  animation: hero-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--hero-delay, 0ms);
+}
+
+@keyframes banner-in {
+  from {
+    transform: translate3d(0, 18px, 0) scale(0.985);
+  }
+  to {
+    transform: none;
+  }
+}
+.banner-in {
+  animation: banner-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* شناور بودن آرام آیکن‌های هیرو */
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+.float-y {
+  animation: float-y 5.5s ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+
+/* پارالاکس هیرو با اسکرول (فقط مرورگرهایی که animation-timeline دارن؛ بقیه چیزی نمی‌بینن و مشکلی ندارن) */
+@keyframes parallax-up-slow {
+  to {
+    transform: translate3d(0, -40px, 0);
+  }
+}
+@keyframes parallax-up-fast {
+  to {
+    transform: translate3d(0, -90px, 0) scale(1.08);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .parallax-slow {
+      animation: parallax-up-slow linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 70vh;
+    }
+    .parallax-fast {
+      animation: parallax-up-fast linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 70vh;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-y,
+  .hero-in,
+  .banner-in {
+    animation: none;
+  }
+}

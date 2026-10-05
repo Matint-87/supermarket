@@ -1,0 +1,549 @@
+// دیتابیس فروشگاه — PostgreSQL
+// نام جدول‌ها و ستون‌ها snake_case هست تا موقع کار مستقیم با SQL (psql / DBeaver) راحت‌تر باشه.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+/// واحد فروش محصول
+enum ProductUnit {
+  PIECE // عدد
+  BOX // بسته / باکس
+  KILOGRAM // کیلوگرم
+  GRAM // گرم
+  MESGHAL // مثقال
+  LITER // لیتر
+  CARTON // باکس
+  TRAY // شانه
+  CAN // حلب
+  CASE // کارتن
+}
+
+/// وضعیت سفارش
+enum OrderStatus {
+  PENDING // ثبت شده، در انتظار پردازش
+  PROCESSING // در حال آماده‌سازی
+  SHIPPING // در حال ارسال
+  DELIVERED // تحویل شده
+  RETURNED // مرجوع شده
+  CANCELED // لغو شده
+}
+
+/// روش ارسال سفارش
+enum ShippingMethod {
+  POST // ارسال با پست
+  COURIER // ارسال با پیک
+  PICKUP // دریافت حضوری از فروشگاه
+}
+
+/// نوع تراکنش مالی
+enum TransactionType {
+  PAYMENT // پرداخت سفارش
+  REFUND // برگشت وجه
+}
+
+enum TransactionStatus {
+  PENDING // در انتظار
+  SUCCESS // موفق
+  FAILED // ناموفق / ردشده
+}
+
+enum PaymentMethod {
+  ONLINE // درگاه پرداخت آنلاین
+  CASH // نقدی / پرداخت در محل
+  CARD_TO_CARD // کارت به کارت
+  WALLET // کیف پول سایت (پرداخت از اعتبار یا برگشت وجه به کیف پول)
+}
+
+/// چه کسی سفارش رو لغو کرده
+enum CancelActor {
+  USER
+  ADMIN
+}
+
+enum WalletTxType {
+  CREDIT // افزایش موجودی
+  DEBIT // کاهش موجودی
+}
+
+enum WalletTxReason {
+  ORDER_PAYMENT // پرداخت سفارش از کیف پول
+  ORDER_REFUND // برگشت وجه سفارش (مثلاً لغو سفارش)
+  ADMIN_ADJUST // شارژ/کسر دستی توسط مدیر
+}
+
+enum OtpPurpose {
+  /// ورود / ثبت‌نام (کاربر جدید یا کاربری که رمز نداره)
+  LOGIN
+  /// فراموشی رمز عبور
+  RESET_PASSWORD
+}
+
+model User {
+  id    String @id @default(uuid()) @db.Uuid
+  /// شماره موبایل نرمال‌شده، همیشه به شکل 09xxxxxxxxx
+  phone String @unique
+  role  Role   @default(USER)
+
+  /// هش scrypt — تا وقتی کاربر رمز انتخاب نکرده null هست
+  passwordHash String? @map("password_hash")
+
+  firstName String? @map("first_name")
+  lastName  String? @map("last_name")
+  email     String? @unique
+  /// آدرس تصویر پروفایل (نسبی، زیر public/uploads/avatars) — تا وقتی کاربر عکس نذاشته null
+  avatarUrl String? @map("avatar_url")
+  /// کد ملی (اختیاری) — برای فاکتور رسمی
+  nationalCode String?   @map("national_code")
+  birthDate    DateTime? @map("birth_date") @db.Date
+  gender       Gender?
+  /// رضایت برای دریافت پیامک تبلیغاتی و تخفیف‌ها
+  smsPromoOptIn Boolean  @default(false) @map("sms_promo_opt_in")
+
+  phoneVerifiedAt    DateTime? @map("phone_verified_at")
+  /// وقتی نام و نام‌خانوادگی ثبت شد پر می‌شه
+  profileCompletedAt DateTime? @map("profile_completed_at")
+
+  /// برای بن کردن کاربر توسط ادمین
+  isActive Boolean @default(true) @map("is_active")
+
+  /// با هر تغییر رمز یا «خروج از همه دستگاه‌ها» یکی زیاد می‌شه و JWTهای قبلی باطل می‌شن
+  /// موجودی کیف پول (تومان). فقط از طریق lib/wallet.js تغییر کنه تا همیشه با wallet_transactions هم‌خوان بمونه
+  walletBalance Int @default(0) @map("wallet_balance")
+
+  tokenVersion     Int       @default(0) @map("token_version")
+  failedLoginCount Int       @default(0) @map("failed_login_count")
+  lockedUntil      DateTime? @map("locked_until")
+  lastLoginAt      DateTime? @map("last_login_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  addresses    Address[]
+  orders       Order[]
+  transactions Transaction[]
+  activityLogs ActivityLog[]
+  walletTransactions WalletTransaction[]
+
+  @@map("users")
+}
+
+model Address {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// عنوان دلخواه: خانه، محل کار، ...
+  label String?
+
+  /// گیرنده ممکنه خود کاربر نباشه
+  recipientName  String @map("recipient_name")
+  recipientPhone String @map("recipient_phone")
+
+  province     String
+  city         String
+  neighborhood String?
+  /// آدرس کامل پستی (خیابان، کوچه، ...)
+  addressLine  String  @map("address_line")
+  plaque       String?
+  unit         String?
+  /// کد پستی ۱۰ رقمی
+  postalCode   String  @map("postal_code")
+
+  /// مختصات انتخاب‌شده روی نقشه (اختیاری)
+  latitude  Float?
+  longitude Float?
+
+  isDefault Boolean  @default(false) @map("is_default")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model OtpCode {
+  id      String     @id @default(uuid()) @db.Uuid
+  phone   String
+  purpose OtpPurpose @default(LOGIN)
+  /// HMAC-SHA256 کد — خود کد هیچ‌جا ذخیره نمی‌شه
+  codeHash   String    @map("code_hash")
+  attempts   Int       @default(0)
+  expiresAt  DateTime  @map("expires_at")
+  consumedAt DateTime? @map("consumed_at")
+  ip         String?
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([phone, createdAt])
+  @@map("otp_codes")
+}
+
+/// شمارنده ساده برای محدود کردن تعداد درخواست‌ها (بدون نیاز به Redis)
+model RateLimit {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime @map("reset_at")
+
+  @@map("rate_limits")
+}
+
+model Category {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  /// آدرس تصویر آیکن دسته (قفسه‌ها/تب‌های صفحه‌ی محصولات)
+  imageUrl String? @map("image_url")
+
+  sortOrder Int     @default(0) @map("sort_order")
+  isActive  Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  products Product[]
+
+  @@index([isActive, sortOrder])
+  @@map("categories")
+}
+
+model Brand {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  /// آدرس تصویر لوگوی برند (اختیاری)
+  imageUrl String? @map("image_url")
+
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  products Product[]
+
+  @@index([isActive, name])
+  @@map("brands")
+}
+
+model Product {
+  id String @id @default(uuid()) @db.Uuid
+
+  categoryId String   @map("category_id") @db.Uuid
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  /// برند محصول (اختیاری) — با حذف برند، محصول بدون برند می‌شه
+  brandId String? @map("brand_id") @db.Uuid
+  brand   Brand?  @relation(fields: [brandId], references: [id], onDelete: SetNull)
+
+  name        String
+  description String?
+
+  /// واحد فروش: بسته/باکس، کیلوگرم، گرم، مثقال، عدد، لیتر
+  unit ProductUnit @default(PIECE)
+  /// مقدار به ازای این واحد (مثلاً ۸۰ برای «۸۰ گرم»)
+  amount Float @default(1)
+
+  /// قیمت پایه به تومان (بدون تخفیف)
+  price Int
+
+  /// درصد تخفیف؛ صفر یعنی بدون تخفیف
+  discountPercent Int @default(0) @map("discount_percent")
+
+  /// موجودی انبار
+  stock Int @default(0)
+
+  imageUrl String? @map("image_url")
+
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([isActive, createdAt])
+  @@map("products")
+}
+
+/// سفارش ثبت‌شده‌ی کاربر. قیمت‌ها و آدرس «اسنپ‌شات» هستن (با تغییر بعدی محصول/آدرس عوض نمی‌شن).
+model Order {
+  id String @id @default(uuid()) @db.Uuid
+  /// کد پیگیری ۸ رقمی که به کاربر نشون داده می‌شه
+  code String @unique
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  status OrderStatus @default(PENDING)
+
+  /// روش ارسال انتخاب‌شده توسط کاربر
+  shippingMethod ShippingMethod @default(POST) @map("shipping_method")
+
+  /// جمع قیمت‌ها بدون تخفیف (تومان)
+  itemsTotal    Int @map("items_total")
+  /// مجموع تخفیف (تومان)
+  discountTotal Int @map("discount_total")
+  /// هزینه‌ی ارسال (تومان) — اسنپ‌شات لحظه‌ی ثبت سفارش از روی محدوده‌ها/تنظیمات ارسال
+  shippingFee   Int @default(0) @map("shipping_fee")
+  /// مبلغ قابل پرداخت = itemsTotal - discountTotal + shippingFee
+  payable       Int
+
+  /// زمان تحویلِ اعلام‌شده به مشتری (اسنپ‌شات)
+  deliveryTime String? @map("delivery_time")
+
+  /// کد رهگیری مرسوله‌ی پستی (اختیاری؛ ادمین موقع ارسال با پست وارد می‌کنه)
+  trackingCode String?   @map("tracking_code")
+  /// لحظه‌ای که سفارش به «در حال ارسال» رفت
+  shippedAt    DateTime? @map("shipped_at")
+  /// لحظه‌ی تحویل (با تأیید ادمین، تأیید مشتری یا تأیید خودکار)
+  deliveredAt  DateTime? @map("delivered_at")
+  /// لحظه‌ای که سفارش به «در حال آماده‌سازی» رفت (برای تایم‌لاین پیگیری سفارش)
+  processingAt DateTime? @map("processing_at")
+
+  /// دلیل و زمان لغو (فقط وقتی status = CANCELED)
+  cancelReason String?      @map("cancel_reason")
+  canceledAt   DateTime?    @map("canceled_at")
+  canceledBy   CancelActor? @map("canceled_by")
+
+  /// توضیح اختیاری کاربر برای سفارش
+  note String?
+
+  // اسنپ‌شات آدرس تحویل
+  recipientName  String  @map("recipient_name")
+  recipientPhone String  @map("recipient_phone")
+  province       String
+  city           String
+  neighborhood   String?
+  addressLine    String  @map("address_line")
+  plaque         String?
+  unit           String?
+  postalCode     String  @map("postal_code")
+  latitude       Float?
+  longitude      Float?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  /// پیکی که سفارش رو تحویل می‌ده (اختیاری)
+  courierId String? @map("courier_id") @db.Uuid
+  courier   Courier? @relation(fields: [courierId], references: [id], onDelete: SetNull)
+
+  items        OrderItem[]
+  transactions Transaction[]
+
+  @@index([courierId])
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([status, shippedAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id      String @id @default(uuid()) @db.Uuid
+  orderId String @map("order_id") @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  /// اگه محصول بعدها حذف بشه null می‌شه ولی اسنپ‌شات پایین می‌مونه
+  productId String?  @map("product_id") @db.Uuid
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  // اسنپ‌شات محصول لحظه‌ی خرید
+  name            String
+  imageUrl        String? @map("image_url")
+  /// مثلاً «۸۰ گرم»
+  unitLabel       String  @map("unit_label")
+  unitPrice       Int     @map("unit_price")
+  discountPercent Int     @map("discount_percent")
+  finalPrice      Int     @map("final_price")
+  quantity        Int
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+/// محدوده‌ی ارسال: هزینه و زمان تحویل برای یک استان یا چند شهر
+model ShippingZone {
+  id   String @id @default(uuid()) @db.Uuid
+  name String
+
+  /// خالی = کل کشور
+  province String?
+  /// خالی = همه‌ی شهرهای استان
+  cities   String[] @default([])
+
+  /// هزینه‌ی ارسال (تومان)
+  fee      Int  @default(0)
+  /// سفارش بالاتر از این مبلغ رایگان ارسال می‌شه (null = بدون ارسال رایگان)
+  freeOver Int? @map("free_over")
+
+  deliveryTime String? @map("delivery_time")
+  isActive     Boolean @default(true) @map("is_active")
+  sortOrder    Int     @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, sortOrder])
+  @@map("shipping_zones")
+}
+
+model Courier {
+  id      String  @id @default(uuid()) @db.Uuid
+  name    String
+  phone   String
+  /// موتور، ماشین، ...
+  vehicle String?
+
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  orders Order[]
+
+  @@map("couriers")
+}
+
+/// تنظیمات کلی فروشگاه به‌صورت key/value (مثلاً key = "shipping")
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+/// تراکنش مالی سفارش: پرداخت یا برگشت وجه
+model Transaction {
+  id String @id @default(uuid()) @db.Uuid
+
+  type   TransactionType
+  status TransactionStatus @default(SUCCESS)
+  method PaymentMethod     @default(ONLINE)
+
+  /// مبلغ (تومان)، همیشه مثبت
+  amount Int
+
+  orderId String @map("order_id") @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id])
+  userId  String @map("user_id") @db.Uuid
+  user    User   @relation(fields: [userId], references: [id])
+
+  /// شماره پیگیری بانکی / رهگیری
+  reference String?
+  note      String?
+
+  /// شناسه‌ی پرداخت درگاه (Authority) — فقط برای پرداخت‌هایی که کاربر خودش از درگاه شروع کرده
+  authority String? @unique
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([type, status, createdAt])
+  @@map("transactions")
+}
+
+/// لاگ کارهای ادمین‌ها (چه کسی، چه چیزی رو، کِی تغییر داد)
+model ActivityLog {
+  id String @id @default(uuid()) @db.Uuid
+
+  adminId   String? @map("admin_id") @db.Uuid
+  admin     User?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  /// اسنپ‌شات نام ادمین (با حذف حساب هم لاگ خوانا می‌مونه)
+  adminName String  @map("admin_name")
+
+  /// CREATE | UPDATE | DELETE | STATUS
+  action   String
+  /// PRODUCT | CATEGORY | BRAND | USER | ORDER | COURIER | SHIPPING_ZONE | SHIPPING_SETTINGS | TRANSACTION
+  entity   String
+  entityId String? @map("entity_id")
+  summary  String
+  ip       String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([entity, action])
+  @@map("activity_logs")
+}
+
+/// دفتر کیف پول کاربر. هر تغییر موجودی یک ردیف داره (balanceAfter = موجودی بعد از همین تراکنش)
+model WalletTransaction {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type         WalletTxType
+  reason       WalletTxReason
+  /// مبلغ (تومان)، همیشه مثبت
+  amount       Int
+  balanceAfter Int            @map("balance_after")
+
+  /// کد ۸ رقمی سفارش مرتبط (اگه داشته باشه)
+  orderCode String? @map("order_code")
+  note      String?
+  /// اسنپ‌شات نام مدیر (برای تغییر دستی)
+  adminName String? @map("admin_name")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([orderCode])
+  @@map("wallet_transactions")
+}
+
+/// بنرهای اسلایدر صفحه‌ی اصلی (مدیریت از پنل ادمین)
+model Banner {
+  id String @id @default(uuid()) @db.Uuid
+
+  /// عنوان: متن جایگزین عکس (alt) و نام بنر در پنل مدیریت
+  title    String
+  imageUrl String  @map("image_url")
+  /// مقصد کلیک: مسیر داخلی (/products?discounted=1) یا آدرس کامل https
+  linkUrl  String? @map("link_url")
+
+  sortOrder Int     @default(0) @map("sort_order")
+  isActive  Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, sortOrder])
+  @@map("banners")
+}
+
+/// عکس‌های آپلودشده (محصول، بنر، آواتار). داخل خود دیتابیس ذخیره می‌شن تا روی Vercel (دیسک فقط‌خواندنی) هم کار کنن
+/// و به سرویس بیرونی نیاز نباشه. عکس‌ها موقع آپلود کوچیک و به WebP تبدیل می‌شن؛ از مسیر /api/images/<id> سرو می‌شن.
+model StoredImage {
+  id String @id @default(uuid()) @db.Uuid
+
+  /// products | banners | avatars (برای پاک‌کردن امن: عکس یک بخش با آدرس بخش دیگه پاک نمی‌شه)
+  folder      String
+  contentType String @map("content_type")
+  data        Bytes
+  size        Int
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("stored_images")
+}
