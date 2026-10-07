@@ -21,6 +21,7 @@ import {
   FaBoxes,
 } from "react-icons/fa";
 import { useAuth } from "@/components/auth/AuthProvider";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 // منوی پنل: هر گروه یا مستقیم لینکه (href) یا زیرمنو داره (children).
 const NAV = [
@@ -148,7 +149,10 @@ export default function AdminShell({ admin, children }) {
           <FaBars size={16} />
         </button>
         <span className="text-sm font-extrabold text-slate-800">پنل مدیریت</span>
-        <Link href="/" className="ms-auto flex items-center gap-1.5 text-xs font-medium text-green-700">
+        <span className="ms-auto">
+          <NotificationBell placement="header" />
+        </span>
+        <Link href="/" className="flex items-center gap-1.5 text-xs font-medium text-green-700">
           <FaStore size={13} />
           فروشگاه
         </Link>
@@ -176,6 +180,9 @@ export default function AdminShell({ admin, children }) {
             <p className="text-sm font-extrabold">پنل مدیریت</p>
             <p className="mt-0.5 truncate text-xs text-green-100">{displayName}</p>
           </div>
+          <span className="hidden md:block">
+            <NotificationBell placement="sidebar" tone="dark" />
+          </span>
           <button
             type="button"
             onClick={() => setOpen(false)}

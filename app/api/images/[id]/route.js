@@ -32,6 +32,8 @@ export async function GET(request, { params }) {
       ETag: etag,
       // جلوگیری از اجرای فایل به‌عنوان نوع دیگه (مثلاً HTML) در مرورگر
       "X-Content-Type-Options": "nosniff",
+      // حتی اگه این آدرس مستقیم باز بشه هیچ اسکریپت/استایلی اجرا نشه
+      "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
     },
   });
 }

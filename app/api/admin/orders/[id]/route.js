@@ -5,6 +5,7 @@ import { requireApiAdmin, toPublicOrder } from "@/lib/dal";
 import { prisma } from "@/lib/db";
 import { lockOrder } from "@/lib/finance";
 import { formatToman } from "@/lib/format";
+import { announceOrderStatus } from "@/lib/notify";
 import { cancelOrder } from "@/lib/order-cancel";
 import { adminOrderStatusSchema } from "@/lib/schemas";
 
@@ -97,5 +98,6 @@ export const PATCH = handler(async (request, { params }) => {
     summary: `وضعیت سفارش ${code} از «${ORDER_STATUS_META[existing.status].label}» به «${ORDER_STATUS_META[status].label}» تغییر کرد`,
   });
 
+  await announceOrderStatus(updated); // اعلان تغییر وضعیت به مشتری
   return ok({ order: toPublicOrder(updated), refunded: 0 });
 });

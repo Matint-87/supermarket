@@ -87,6 +87,15 @@ enum WalletTxReason {
   ADMIN_ADJUST // شارژ/کسر دستی توسط مدیر
 }
 
+/// نوع اعلان درون‌برنامه‌ای / پوش
+enum NotificationType {
+  ORDER_NEW // (ادمین) سفارش جدید ثبت شد
+  ORDER_CANCELED // (ادمین) مشتری سفارش را لغو کرد
+  LOW_STOCK // (ادمین) موجودی یک کالا کم شد
+  OUT_OF_STOCK // (ادمین) موجودی یک کالا تمام شد
+  ORDER_STATUS // (مشتری) وضعیت سفارش عوض شد
+}
+
 enum OtpPurpose {
   /// ورود / ثبت‌نام (کاربر جدید یا کاربری که رمز نداره)
   LOGIN
@@ -139,6 +148,8 @@ model User {
   transactions Transaction[]
   activityLogs ActivityLog[]
   walletTransactions WalletTransaction[]
+  notifications      Notification[]
+  pushSubscriptions  PushSubscription[]
 
   @@map("users")
 }
@@ -546,4 +557,43 @@ model StoredImage {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("stored_images")
+}
+
+/// اعلان‌های هر کاربر (مشتری یا ادمین). همزمان با ساخت، از طریق SSE به مرورگرهای باز و از طریق Web Push به دستگاه‌ها می‌رسه.
+model Notification {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type  NotificationType
+  title String
+  body  String
+  /// مسیر داخلی که با کلیک روی اعلان باز می‌شه (مثلاً /admin/orders/12345678)
+  url   String?
+
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+/// اشتراک Web Push هر دستگاه/مرورگر (هر کاربر می‌تونه چند دستگاه داشته باشه: موبایل، لپ‌تاپ، ...)
+model PushSubscription {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  endpoint  String  @unique
+  p256dh    String
+  auth      String
+  userAgent String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }

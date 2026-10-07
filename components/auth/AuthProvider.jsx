@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api-client";
+import { disablePushOnThisDevice } from "@/lib/push-client";
 
 const AuthContext = createContext({
   user: null,
@@ -37,6 +38,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
+      await disablePushOnThisDevice(); // دستگاه بعد از خروج اعلان کاربر قبلی را نگیرد
       await api("POST", "/api/auth/logout", {});
     } finally {
       setState({ user: null, loading: false });

@@ -5,6 +5,7 @@ import AuthButton from "@/components/auth/AuthButton";
 import CartButton from "@/components/cart/CartButton";
 import SearchBox, { SearchBoxFallback } from "@/components/SearchBox";
 import BackButton from "@/components/BackButton";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function Header() {
   return (
@@ -27,6 +28,9 @@ export default function Header() {
         <Suspense fallback={<SearchBoxFallback />}>
           <SearchBox />
         </Suspense>
+
+        {/* زنگوله‌ی اعلان: روی موبایل هم دیده می‌شه (فقط برای کاربر واردشده) */}
+        <NotificationBell />
 
         <div className="ms-auto hidden items-center gap-2 md:ms-0 md:flex">
           <AuthButton />

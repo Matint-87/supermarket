@@ -4,6 +4,7 @@ import { requireApiUser, toPublicOrder } from "@/lib/dal";
 import { prisma } from "@/lib/db";
 import { moneyByOrder, publicPayment } from "@/lib/finance";
 import { autoDeliverOverdue } from "@/lib/order-delivery";
+import { announceNewOrder } from "@/lib/notify";
 import { rateLimit } from "@/lib/rate-limit";
 import { getStoreStatus } from "@/lib/settings";
 import { quoteForMethod } from "@/lib/shipping-quote";
@@ -185,6 +186,12 @@ export const POST = handler(async (request) => {
           },
           include: { items: true },
         });
+      });
+      // اعلان به ادمین‌ها: سفارش جدید + کم/تمام‌شدن موجودی (خطاش سفارش رو خراب نمی‌کنه)
+      await announceNewOrder({
+        order,
+        user,
+        lines: lines.map((l) => ({ productId: l.product.id, name: l.product.name, quantity: l.quantity })),
       });
       const payment = publicPayment(order, { paidSuccess: 0, paidPending: 0, refundSuccess: 0, refundPending: 0 });
       return ok({ order: { ...toPublicOrder(order), payment }, walletBalance: user.walletBalance }, { status: 201 });

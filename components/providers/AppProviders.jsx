@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ConfirmProvider } from "@/components/providers/ConfirmProvider";
+import { NotificationProvider } from "@/components/notifications/NotificationProvider";
 import { StoreStatusProvider } from "@/components/providers/StoreStatusProvider";
 import { ThemeProvider, useTheme } from "@/components/providers/ThemeProvider";
 
@@ -33,8 +34,10 @@ export default function AppProviders({ children }) {
       <AuthProvider>
         <ConfirmProvider>
           <StoreStatusProvider>
-            {children}
-            <ThemedToasts />
+            <NotificationProvider>
+              {children}
+              <ThemedToasts />
+            </NotificationProvider>
           </StoreStatusProvider>
         </ConfirmProvider>
       </AuthProvider>
