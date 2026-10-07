@@ -6,7 +6,7 @@ import { toFaDigits } from "@/lib/phone";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "درگاه آزمایشی پرداخت" };
+export const metadata = { title: "درگاه آزمایشی پرداخت", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 /**

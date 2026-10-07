@@ -9,17 +9,13 @@ import Reveal from "@/components/Reveal";
 // رنگ پس‌زمینه‌ی دایره‌ها؛ به‌ترتیب روی دسته‌ها می‌چرخه
 const BGS = [
   "bg-orange-100",
-  "bg-indigo-100",
   "bg-sky-100",
-  "bg-pink-100",
   "bg-amber-100",
   "bg-rose-100",
   "bg-green-100",
   "bg-red-100",
-  "bg-lime-100",
   "bg-violet-100",
   "bg-emerald-100",
-  "bg-yellow-100",
 ];
 
 const PLACEHOLDER =
@@ -71,7 +67,7 @@ function ShelfItem({ category, bg, index }) {
   return (
     // با کلیک، صفحه‌ی محصولات با همون دسته باز می‌شه. هر دایره کمی دیرتر از قبلی ظاهر می‌شه (حداکثر ۹ پله)
     <Reveal from="zoom" delay={Math.min(index, 9) * 55}>
-      <Link href={`/products?category=${category.id}`} className="group flex flex-col items-center gap-2.5 lg:gap-3">
+      <Link href={`/categories/${category.id}`} className="group flex flex-col items-center gap-2.5 lg:gap-3">
         <span
           className={`relative block aspect-square w-full max-w-24 overflow-hidden rounded-full shadow-sm ring-1 ring-black/5 transition duration-300 group-hover:scale-105 group-hover:shadow-md lg:max-w-28 2xl:max-w-32 ${bg}`}
         >
@@ -103,10 +99,12 @@ function ShelvesSkeleton() {
 }
 
 /** قفسه‌ها = دسته‌بندی‌هایی که تو پنل ادمین می‌سازی (اسم + عکس آیکن همون دسته) */
-export default function Shelves() {
-  const [categories, setCategories] = useState(null); // null یعنی در حال لود
+export default function Shelves({ initialCategories = null }) {
+  // initialCategories از سرور می‌آد (لینک دسته‌ها توی HTML اولیه باشه)؛ اگه نبود از API لود می‌شه
+  const [categories, setCategories] = useState(initialCategories); // null یعنی در حال لود
 
   useEffect(() => {
+    if (initialCategories) return;
     let alive = true;
     api("GET", "/api/categories")
       .then((d) => alive && setCategories(d.categories))
@@ -114,7 +112,7 @@ export default function Shelves() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [initialCategories]);
 
   // اگه هیچ دسته‌ای نیست کل بخش مخفی می‌شه
   if (categories && categories.length === 0) return null;

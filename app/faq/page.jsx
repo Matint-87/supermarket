@@ -1,9 +1,14 @@
+import { buildMetadata } from "@/lib/seo";
 import { FaChevronDown } from "react-icons/fa";
 import InfoPage, { PageLink } from "@/components/pages/InfoPage";
 import { RETURN_WINDOW_DAYS, STORE_INFO } from "@/lib/store-info";
 import { formatNumber } from "@/lib/format";
 
-export const metadata = { title: `سوالات متداول | ${STORE_INFO.name}` };
+export const metadata = buildMetadata({
+  title: "سوالات متداول",
+  description: `پاسخ سوالات رایج درباره ثبت سفارش، پرداخت، ارسال، پیگیری و بازگشت کالا در ${STORE_INFO.name}.`,
+  path: "/faq",
+});
 
 const FAQ = [
   {

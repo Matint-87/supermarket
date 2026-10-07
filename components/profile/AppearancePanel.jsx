@@ -2,14 +2,16 @@
 
 import { FaCheck, FaDesktop, FaMoon, FaSun } from "react-icons/fa";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { PALETTE_BY_ID, DEFAULT_PALETTE } from "@/lib/palettes";
 
 /**
  * انتخاب ظاهر سایت: سیستم (پیش‌فرض) / روشن / تاریک.
  * پیش‌نمایش‌ها عمداً با رنگ ثابت کشیده شدن (نه متغیرهای تم) تا همیشه همون ظاهر واقعی گزینه رو نشون بدن.
  */
 
-const LIGHT = { bg: "#f2efe7", card: "#ffffff", line: "#dcd7c8", text: "#1e293b", mute: "#c7c1af", brand: "#3368a0" };
-const DARK = { bg: "#0d131c", card: "#131b27", line: "#263247", text: "#e4e9f1", mute: "#36455d", brand: "#4d85af" };
+// رنگ پیش‌نمایش‌ها از همون پالت پیش‌فرضِ lib/palettes.js می‌آد (دیگه کپی دستی نداریم)
+const LIGHT = PALETTE_BY_ID[DEFAULT_PALETTE].light;
+const DARK = PALETTE_BY_ID[DEFAULT_PALETTE].dark;
 
 function MiniScreen({ c }) {
   return (

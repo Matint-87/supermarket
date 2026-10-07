@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartPageClient from "@/components/cart/CartPageClient";
 
-export const metadata = { title: "سبد خرید | سوپرمارکت رحیمی" };
+export const metadata = { title: "سبد خرید", robots: { index: false, follow: false } };
 
 export default function CartPage() {
   return (

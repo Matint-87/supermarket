@@ -30,14 +30,16 @@ async function fetchProducts({ cursor, categoryId, q, discounted }) {
  * برای عوض‌شدن دسته/جستجو، والد باید یک `key` جدید بده تا گرید از صفر ساخته بشه
  * (به این ترتیب پاسخ‌های کهنه‌ی درخواست قبلی هیچ‌وقت وارد لیست جدید نمی‌شن).
  */
-export default function ProductsGrid({ categoryId = null, q = null, discounted = false }) {
-  const [products, setProducts] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(true);
+export default function ProductsGrid({ categoryId = null, q = null, discounted = false, initialProducts = null }) {
+  // initialProducts: صفحه‌ی اولی که سرور توی HTML گذاشته (برای سئو)؛ بعدش اسکرول بی‌نهایت از cursor ادامه می‌ده
+  const seeded = initialProducts && initialProducts.length > 0;
+  const [products, setProducts] = useState(seeded ? initialProducts : []);
+  const [hasMore, setHasMore] = useState(seeded ? initialProducts.length >= PRODUCTS_PAGE_SIZE : true);
+  const [loading, setLoading] = useState(!seeded);
   const [error, setError] = useState("");
   useToastOnChange(error);
   const sentinelRef = useRef(null);
-  const cursorRef = useRef(null);
+  const cursorRef = useRef(seeded ? initialProducts[initialProducts.length - 1].id : null);
   const loadingRef = useRef(false);
 
   const loadMore = useCallback(async () => {
@@ -61,7 +63,9 @@ export default function ProductsGrid({ categoryId = null, q = null, discounted =
 
   // اولین صفحه
   useEffect(() => {
+    if (seeded) return; // صفحه‌ی اول از سرور اومده
     loadMore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMore]);
 
   // رسیدن اسکرول به انتهای لیست → صفحه‌ی بعد

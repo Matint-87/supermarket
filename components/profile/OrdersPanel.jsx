@@ -40,7 +40,7 @@ const STATUS_META = {
   PENDING: { label: "در انتظار بررسی", icon: FaClock, color: "text-amber-600 bg-amber-50" },
   PROCESSING: { label: "در حال آماده‌سازی", icon: FaBoxOpen, color: "text-sky-700 bg-sky-50" },
   SHIPPING: { label: "در حال ارسال", icon: FaTruck, color: "text-violet-700 bg-violet-50" },
-  DELIVERED: { label: "تحویل شده", icon: FaCheckCircle, color: "text-green-700 bg-green-50" },
+  DELIVERED: { label: "تحویل شده", icon: FaCheckCircle, color: "text-emerald-700 bg-emerald-50" },
   RETURNED: { label: "مرجوع شده", icon: FaUndoAlt, color: "text-slate-600 bg-slate-100" },
   CANCELED: { label: "لغو شده", icon: FaTimesCircle, color: "text-red-600 bg-red-50" },
 };
@@ -133,7 +133,7 @@ function OrderCard({ order, walletBalance, onChanged }) {
         </div>
       )}
       {order.status === "DELIVERED" && order.deliveredAt && (
-        <p className="mb-3 rounded-xl bg-green-50 p-3 text-xs text-green-800">تحویل شده در {formatJalaliDateTime(order.deliveredAt)}</p>
+        <p className="mb-3 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800">تحویل شده در {formatJalaliDateTime(order.deliveredAt)}</p>
       )}
 
       {order.status === "CANCELED" && (

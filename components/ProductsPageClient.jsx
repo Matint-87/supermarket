@@ -6,7 +6,7 @@ import CategoryTabs from "@/components/CategoryTabs";
 import ProductsGrid from "@/components/ProductsGrid";
 import { api } from "@/lib/api-client";
 
-export default function ProductsPageClient() {
+export default function ProductsPageClient({ initialProducts = null }) {
   const params = useSearchParams();
   const q = params.get("q")?.trim() || null;
   const discounted = params.get("discounted") === "1";
@@ -32,6 +32,7 @@ export default function ProductsPageClient() {
         categoryId={activeCategoryId}
         q={q}
         discounted={discounted}
+        initialProducts={activeCategoryId === null && !q && !discounted ? initialProducts : null}
       />
     </main>
   );

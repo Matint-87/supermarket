@@ -4,7 +4,7 @@ import BottomNav from "@/components/BottomNav";
 import ProfilePageClient from "@/components/profile/ProfilePageClient";
 import { requireUser, toPublicUser } from "@/lib/dal";
 
-export const metadata = { title: "حساب کاربری | سوپرمارکت رحیمی" };
+export const metadata = { title: "حساب کاربری", robots: { index: false, follow: false } };
 
 const SECTIONS = ["orders", "wallet", "addresses", "info", "appearance"];
 

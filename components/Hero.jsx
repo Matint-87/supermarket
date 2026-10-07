@@ -1,22 +1,22 @@
 import Link from "next/link";
 import {
-  FaAppleAlt,
   FaBreadSlice,
-  FaCarrot,
   FaCheese,
-  FaFish,
+  FaCoffee,
+  FaCookieBite,
   FaPercent,
+  FaPumpSoap,
   FaShoppingBasket,
   FaTruck,
 } from "react-icons/fa";
 
-// آیکن‌های شناور دور سبد (فقط دسکتاپ). موقعیت‌ها با درصد از کادر هنر؛ delay باعث می‌شه هم‌زمان بالا و پایین نرن
+// آیکن‌های شناور دور سبد (فقط دسکتاپ): کالاهای سوپرمارکتی (شوینده، تنقلات، نان، پنیر، چای). موقعیت‌ها با درصد از کادر هنر؛ delay باعث می‌شه هم‌زمان بالا و پایین نرن
 const FLOATERS = [
-  { icon: FaAppleAlt, pos: "top-[4%] right-[8%]", size: "h-14 w-14", delay: "0s" },
-  { icon: FaCarrot, pos: "top-[30%] -left-2", size: "h-12 w-12", delay: "-1.4s" },
+  { icon: FaPumpSoap, pos: "top-[4%] right-[8%]", size: "h-14 w-14", delay: "0s" },
+  { icon: FaCookieBite, pos: "top-[30%] -left-2", size: "h-12 w-12", delay: "-1.4s" },
   { icon: FaBreadSlice, pos: "bottom-[6%] right-[2%]", size: "h-14 w-14", delay: "-2.8s" },
   { icon: FaCheese, pos: "bottom-[2%] left-[16%]", size: "h-12 w-12", delay: "-4.1s" },
-  { icon: FaFish, pos: "top-[0%] left-[30%]", size: "h-11 w-11", delay: "-0.7s" },
+  { icon: FaCoffee, pos: "top-[0%] left-[30%]", size: "h-11 w-11", delay: "-0.7s" },
 ];
 
 /** هیرو صفحه‌ی اصلی؛ درست زیر هدر. استاتیکه و ورودش فقط با CSS انجام می‌شه (بدون کلاینت‌کامپوننت) */

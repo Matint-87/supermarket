@@ -2,8 +2,8 @@
 // فقط امضا/انقضای JWT رو می‌بینه (بدون دیتابیس). بررسی واقعی (کاربر بن نشده، tokenVersion، نقش)
 // توی خود صفحه‌ها با lib/dal.js انجام می‌شه؛ این فقط جلوی رندر بی‌خودی رو می‌گیره.
 import { NextResponse } from "next/server";
-import { SESSION_COOKIE } from "@/lib/auth-constants";
-import { verifySessionToken } from "@/lib/token";
+import { SESSION_COOKIE, SESSION_MAX_AGE, SESSION_RENEW_AFTER } from "@/lib/auth-constants";
+import { signSessionToken, verifySessionToken } from "@/lib/token";
 
 // این مسیرها بدون ورود قابل دیدن نیستن
 const AUTH_REQUIRED_PREFIXES = ["/admin", "/profile", "/complete-profile"];
@@ -24,10 +24,43 @@ function isAuthRequired(pathname) {
   return AUTH_REQUIRED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
+/**
+ * تمدید خودکار نشست (sliding session): اگه کاربر لاگین‌ـه و توکنش بیشتر از یک روز از صدورش گذشته،
+ * یه توکن تازه‌ی ۳۰ روزه می‌سازیم. نتیجه: تا وقتی کاربر حداقل هر ۳۰ روز یه بار سر می‌زنه، هیچ‌وقت لاگ‌اوت نمی‌شه.
+ * (فقط همون داده‌های قبلیِ توکن کپی می‌شه؛ بررسی واقعی tokenVersion/بن‌بودن هنوز توی lib/dal.js انجام می‌شه،
+ * پس توکن باطل‌شده با تمدید دوباره معتبر نمی‌شه.)
+ */
+async function renewedToken(session) {
+  if (!session?.iat) return null;
+  const age = Math.floor(Date.now() / 1000) - session.iat;
+  if (age < SESSION_RENEW_AFTER) return null;
+  return signSessionToken({
+    userId: session.sub,
+    role: session.role,
+    tokenVersion: session.tv,
+    profileCompleted: session.pc,
+  });
+}
+
 export async function proxy(request) {
   const { pathname, search } = request.nextUrl;
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   const session = token ? await verifySessionToken(token) : null;
+
+  // اگه تمدید لازم بود، کوکی جدید روی پاسخ (چه صفحه، چه ریدایرکت) گذاشته می‌شه
+  const fresh = await renewedToken(session);
+  const withRenewal = (response) => {
+    if (fresh) {
+      response.cookies.set(SESSION_COOKIE, fresh, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // مثل lib/session.js
+        sameSite: "lax",
+        path: "/",
+        maxAge: SESSION_MAX_AGE,
+      });
+    }
+    return response;
+  };
 
   if (isAuthRequired(pathname) && !session) {
     const url = new URL("/auth/login", request.url);
@@ -36,7 +69,7 @@ export async function proxy(request) {
   }
 
   if (pathname.startsWith("/admin") && session && session.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/", request.url));
+    return withRenewal(NextResponse.redirect(new URL("/", request.url)));
   }
 
   // کاربرِ واردشده‌ای که هنوز حسابش کامل نیست، تا تمومش نکنه نباید بتونه به بقیه‌ی صفحات سایت بره.
@@ -46,10 +79,10 @@ export async function proxy(request) {
   if (session && !session.pc && !allowedWhileIncomplete(pathname)) {
     const url = new URL("/complete-profile", request.url);
     url.searchParams.set("next", pathname + search);
-    return NextResponse.redirect(url);
+    return withRenewal(NextResponse.redirect(url));
   }
 
-  return NextResponse.next();
+  return withRenewal(NextResponse.next());
 }
 
 // همه‌ی صفحات سایت (به‌جز فایل‌های استاتیک/اینترنال، API و صفحات auth) از این عبور می‌کنن —
@@ -57,5 +90,5 @@ export async function proxy(request) {
 // /auth عمداً بیرونه: اگه توکن امضای درست ولی کاربر بن/توکن باطل باشه، ریدایرکت رفت‌وبرگشتی (loop) ساخته می‌شد؛
 // صفحه‌ی ورود خودش (LoginFlow) کاربرِ واردشده رو به مسیر درست می‌فرسته.
 export const config = {
-  matcher: ["/((?!api|auth|_next/static|_next/image|favicon.ico|images|uploads).*)"],
+  matcher: ["/((?!api|auth|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|icon.png|apple-icon.png|og-default.png|images|uploads).*)"],
 };

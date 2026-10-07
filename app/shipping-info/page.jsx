@@ -1,3 +1,4 @@
+import { buildMetadata } from "@/lib/seo";
 import InfoPage, { List, P, Section } from "@/components/pages/InfoPage";
 import { prisma } from "@/lib/db";
 import { formatToman } from "@/lib/format";
@@ -5,7 +6,11 @@ import { getShippingSettings } from "@/lib/settings";
 import { SHIPPING_METHODS } from "@/lib/shipping";
 import { STORE_INFO } from "@/lib/store-info";
 
-export const metadata = { title: `هزینه و زمان ارسال | ${STORE_INFO.name}` };
+export const metadata = buildMetadata({
+  title: "هزینه و زمان ارسال",
+  description: `هزینه، زمان و روش‌های ارسال سفارش از ${STORE_INFO.name}؛ پست، پیک فروشگاه و دریافت حضوری.`,
+  path: "/shipping-info",
+});
 
 // هزینه‌ها از پنل مدیریت می‌آن؛ پس صفحه نباید موقع build ثابت بشه
 export const dynamic = "force-dynamic";

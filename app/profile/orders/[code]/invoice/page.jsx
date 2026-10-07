@@ -6,7 +6,7 @@ import { requireUser, toPublicOrder } from "@/lib/dal";
 import { prisma } from "@/lib/db";
 import { moneyByOrder, publicPayment } from "@/lib/finance";
 
-export const metadata = { title: "فاکتور سفارش | سوپرمارکت رحیمی" };
+export const metadata = { title: "فاکتور سفارش", robots: { index: false, follow: false } };
 
 export default async function InvoicePage({ params }) {
   const { code } = await params;

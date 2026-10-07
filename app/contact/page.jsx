@@ -1,9 +1,14 @@
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { FaClock, FaEnvelope, FaMapMarkerAlt, FaPhoneAlt } from "react-icons/fa";
 import InfoPage, { P, Section } from "@/components/pages/InfoPage";
 import { STORE_INFO } from "@/lib/store-info";
 
-export const metadata = { title: `تماس با ما | ${STORE_INFO.name}` };
+export const metadata = buildMetadata({
+  title: "تماس با ما",
+  description: `راه‌های ارتباط با ${STORE_INFO.name}؛ آدرس، تلفن و ساعت کاری فروشگاه.`,
+  path: "/contact",
+});
 
 export default function ContactPage() {
   const rows = [

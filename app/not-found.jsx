@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "صفحه پیدا نشد | سوپرمارکت رحیمی" };
+export const metadata = { title: "صفحه پیدا نشد", robots: { index: false, follow: false } };
 
 /** صفحه‌ی ۴۰۴ برای کل سایت (هر آدرسی که وجود نداشته باشه یا notFound() صدا زده بشه) */
 export default function NotFound() {

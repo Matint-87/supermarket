@@ -1,7 +1,12 @@
+import { buildMetadata } from "@/lib/seo";
 import InfoPage, { List, P, PageLink, Section } from "@/components/pages/InfoPage";
 import { STORE_INFO } from "@/lib/store-info";
 
-export const metadata = { title: `قوانین و مقررات | ${STORE_INFO.name}` };
+export const metadata = buildMetadata({
+  title: "قوانین و مقررات",
+  description: `قوانین و مقررات استفاده از ${STORE_INFO.name} و خرید آنلاین.`,
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

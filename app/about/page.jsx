@@ -1,7 +1,12 @@
+import { buildMetadata } from "@/lib/seo";
 import InfoPage, { P, PageLink, Section } from "@/components/pages/InfoPage";
 import { STORE_INFO } from "@/lib/store-info";
 
-export const metadata = { title: `درباره‌ی ما | ${STORE_INFO.name}` };
+export const metadata = buildMetadata({
+  title: "درباره‌ی ما",
+  description: `آشنایی با ${STORE_INFO.name}: فروشگاه آنلاین مایحتاج روزانه با قیمت مناسب، ضمانت اصالت کالا و ارسال سریع.`,
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

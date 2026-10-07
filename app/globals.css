@@ -53,24 +53,24 @@
   font-family: Number;
   font-weight: 400;
   font-display: swap;
-  src: url(/font/Vazirmatn-FD-Medium.6f2fbed0.woff2) format("woff2");
+  src: url(/font/Shabnam-FD-UqE7V9cL.woff2) format("woff2");
 }
 @font-face {
   font-family: Number;
   font-weight: 500;
   font-display: swap;
-  src: url(/font/Vazirmatn-FD-Regular.36566045.woff2) format("woff2");
+  src: url(/font/Shabnam-Medium-FD-CCYWnpK7.woff2) format("woff2");
 }
 @font-face {
   font-family: Number;
   font-weight: 700 900;
   font-display: swap;
-  src: url(/font/Vazirmatn-FD-Regular.36566045.woff2) format("woff2");
+  src: url(/font/Shabnam-Bold-FD-B4xNpIWI.woff2) format("woff2");
 }
 @font-face {
   font-family: fontello;
   font-display: swap;
-  src: url(/font/Vazirmatn-FD-Regular.36566045.woff2) format("woff2");
+  src: url(/font/fontello-Cqw191qV.woff2) format("woff2");
 }
 
 :root {

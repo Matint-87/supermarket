@@ -1,16 +1,6 @@
 "use client"
 import { useEffect, useRef, useState } from "react";
-
-// پلیس‌هولدر عکس (اگه فایل عکس پیدا نشد)
-const PLACEHOLDER =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'>
-      <rect width='200' height='200' fill='#F2EFE7'/>
-      <path d='M60 140l28-36 22 26 16-18 24 28z' fill='#C8DFDB'/>
-      <circle cx='78' cy='76' r='12' fill='#C8DFDB'/>
-    </svg>`,
-  );
+import { FaImage } from "react-icons/fa";
 
 export default function LazyImage({ src, alt, className = "" }) {
   const [loaded, setLoaded] = useState(false);
@@ -31,9 +21,15 @@ export default function LazyImage({ src, alt, className = "" }) {
     <div className={`relative overflow-hidden ${className}`}>
       {/* جای خالی ثابت (بدون انیمیشن) تا وقتی عکس لود بشه */}
       {!loaded && <div className="absolute inset-0 bg-slate-100" />}
+      {/* اگه فایل عکس پیدا نشد: پلیس‌هولدر با رنگ‌های تم (توی تاریک و پالت‌های دیگه هم هماهنگ می‌مونه) */}
+      {failed && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-100 text-green-300">
+          <FaImage className="h-1/3 w-1/3" />
+        </div>
+      )}
       <img
         ref={imgRef}
-        src={failed ? PLACEHOLDER : src}
+        src={failed ? undefined : src}
         alt={alt}
         loading="lazy"
         decoding="async"
@@ -43,7 +39,7 @@ export default function LazyImage({ src, alt, className = "" }) {
           setFailed(true);
           setLoaded(true);
         }}
-        className={`h-full w-full object-contain ${loaded ? "opacity-100" : "opacity-0"}`}
+        className={`h-full w-full object-contain ${loaded && !failed ? "opacity-100" : "opacity-0"}`}
       />
     </div>
   );

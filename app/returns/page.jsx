@@ -1,8 +1,13 @@
+import { buildMetadata } from "@/lib/seo";
 import InfoPage, { Callout, List, P, PageLink, Section } from "@/components/pages/InfoPage";
 import { RETURN_WINDOW_DAYS, STORE_INFO } from "@/lib/store-info";
 import { formatNumber } from "@/lib/format";
 
-export const metadata = { title: `بازگشت و تعویض کالا | ${STORE_INFO.name}` };
+export const metadata = buildMetadata({
+  title: "بازگشت و تعویض کالا",
+  description: `شرایط و مهلت بازگشت و تعویض کالا در ${STORE_INFO.name}.`,
+  path: "/returns",
+});
 
 export default function ReturnsPage() {
   const days = formatNumber(RETURN_WINDOW_DAYS);

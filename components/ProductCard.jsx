@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import LazyImage from "@/components/LazyImage";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import { formatNumber } from "@/lib/format";
@@ -21,16 +22,22 @@ export default function ProductCard({ product, compact = false }) {
             ٪{formatNumber(product.discountPercent)}
           </span>
         )}
-        <LazyImage
-          src={product.imageUrl || ""}
-          alt={product.name}
-          className={`${compact ? "h-28" : "aspect-square"} w-full rounded-xl bg-slate-50 ${soldOut ? "opacity-50 grayscale" : ""}`}
-        />
+        <Link href={`/products/${product.id}`} tabIndex={-1} aria-hidden="true" className="block">
+          <LazyImage
+            src={product.imageUrl || ""}
+            alt={product.name}
+            className={`${compact ? "h-28" : "aspect-square"} w-full rounded-xl bg-slate-50 ${soldOut ? "opacity-50 grayscale" : ""}`}
+          />
+        </Link>
         <AddToCartButton product={product} className="absolute -bottom-2 end-0 z-10" />
       </div>
 
       <div className="mt-3 flex flex-1 flex-col gap-1">
-        <h3 className="line-clamp-2 min-h-10 text-xs font-medium leading-5 text-slate-700">{product.name}</h3>
+        <h3 className="line-clamp-2 min-h-10 text-xs font-medium leading-5 text-slate-700">
+          <Link href={`/products/${product.id}`} className="hover:text-green-700">
+            {product.name}
+          </Link>
+        </h3>
         <p className="text-xs text-slate-400">{formatUnitAmount(product.amount, product.unit)}</p>
 
         {lowStock && (
