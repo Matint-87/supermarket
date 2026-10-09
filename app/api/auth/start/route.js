@@ -23,6 +23,7 @@ export const POST = handler(async (request) => {
   }
   if (user?.passwordHash) return ok({ step: "password", phone });
 
-  const otp = await sendOtp({ phone, purpose: "LOGIN", ip });
+  // reuse: اگه کد قبلی هنوز معتبره (مثلاً کاربر صفحه رو رفرش کرده)، پیامک تازه نمی‌فرسته و همون رو ادامه می‌ده
+  const otp = await sendOtp({ phone, purpose: "LOGIN", ip, reuse: true });
   return ok({ step: "otp", phone, purpose: "LOGIN", isNew: !user, ...otp });
 });

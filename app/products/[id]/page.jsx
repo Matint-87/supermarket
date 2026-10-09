@@ -108,7 +108,7 @@ export default async function ProductPage({ params }) {
           </ol>
         </nav>
 
-        <article className="grid gap-6 rounded-3xl bg-white p-4 shadow-soft ring-1 ring-slate-200/70 md:grid-cols-2 md:p-8">
+        <article className="grid grid-cols-1 gap-6 rounded-3xl bg-white p-4 shadow-soft ring-1 ring-slate-200/70 md:grid-cols-2 md:p-8">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-slate-50">
             {p.imageUrl ? (
               // اولین تصویر صفحه (LCP): بدون lazy، با اولویت بالا

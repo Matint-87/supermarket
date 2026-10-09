@@ -6,21 +6,35 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api-client";
 import { ADMIN_NOTIFICATION_TYPES } from "@/lib/notification-constants";
+import { buildSounds, vibrate } from "@/lib/notification-sound";
 import { enablePush, pushSupported, registerServiceWorker, syncPush } from "@/lib/push-client";
 
 const NotificationContext = createContext({
   items: [],
   unread: 0,
+  hasMore: false,
+  loadingMore: false,
+  loadMore: async () => {},
   soundOn: true,
   setSoundOn: () => {},
   permission: "unavailable",
   enable: async () => {},
   markRead: async () => {},
   markAllRead: async () => {},
+  remove: async (ids) => {},
+  removeAll: async () => {},
+  testSound: () => {},
   open: (n) => {},
 });
 
 const SOUND_KEY = "shop:notif-sound";
+
+/** ادغام دو لیست اعلان بدون تکرار؛ جدیدترین اول (برای وقتی صفحه‌های قبلی لود شده‌ان و لیست تازه می‌رسه) */
+function mergeById(...lists) {
+  const map = new Map();
+  for (const list of lists) for (const n of list) if (!map.has(n.id)) map.set(n.id, n);
+  return [...map.values()].sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0));
+}
 
 /**
  * اعلان‌های لحظه‌ای: لیست از API، اتصال زنده با SSE، صدا، toast، badge روی آیکن برنامه و ثبت Web Push.
@@ -32,13 +46,20 @@ export function NotificationProvider({ children }) {
   const pathname = usePathname();
   const [items, setItems] = useState([]);
   const [unread, setUnread] = useState(0);
+  const [nextCursor, setNextCursor] = useState(null); // null = صفحه‌ی بعدی نداریم
+  const [loadingMore, setLoadingMore] = useState(false);
+  const cursorLoaded = useRef(false); // آیا اولین صفحه لود شده؟ (بعدش cursor رو فقط loadMore عوض می‌کنه)
+  const loadingMoreRef = useRef(false);
   const [soundOn, setSoundOnState] = useState(true);
   const [permission, setPermission] = useState("unavailable");
-  const audio = useRef({ notify: null, order: null, unlocked: false });
+  // صدا با Web Audio API: روی موبایل (iOS/Android) برخلاف <audio> بعد از یک بار «باز شدن قفل» قابل‌اعتماد پخش می‌شه
+  const audio = useRef({ ctx: null, buffers: {}, unlocked: false });
   const seen = useRef(new Set());
   const pathRef = useRef(pathname);
   pathRef.current = pathname;
   const soundRef = useRef(true);
+  const itemsRef = useRef([]);
+  itemsRef.current = items;
 
   // تنظیم صدا + اجازه‌ی فعلی مرورگر
   useEffect(() => {
@@ -58,40 +79,77 @@ export function NotificationProvider({ children }) {
     } catch {}
   }, []);
 
-  // مرورگرها قبل از اولین تعامل کاربر اجازه‌ی پخش صدا نمی‌دهند؛ با اولین کلیک/لمس «قفل صدا» باز می‌شود
+  // مرورگرها قبل از اولین تعامل کاربر اجازه‌ی پخش صدا نمی‌دهند. با اولین لمس/کلیک «قفل صدا» باز می‌شه.
+  // نکته‌ی مهم: روی موبایل رویداد pointerdown «تعامل معتبر» حساب نمی‌شه؛ فقط pointerup/touchend/click/keydown.
+  // (نسخه‌ی قبلی با pointerdown قفل رو باز می‌کرد، پخش رد می‌شد، و صدا برای همیشه mute می‌موند.)
   useEffect(() => {
-    audio.current.notify = new Audio("/sounds/notify.wav");
-    audio.current.order = new Audio("/sounds/order.wav");
-    const unlock = async () => {
-      if (audio.current.unlocked) return;
-      for (const a of [audio.current.notify, audio.current.order]) {
-        try {
-          a.muted = true;
-          await a.play();
-          a.pause();
-          a.currentTime = 0;
-          a.muted = false;
-        } catch {}
-      }
-      audio.current.unlocked = true;
-      window.removeEventListener("pointerdown", unlock);
-      window.removeEventListener("keydown", unlock);
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    let ctx;
+    try {
+      ctx = new AC();
+    } catch {
+      return;
+    }
+    audio.current.ctx = ctx;
+    audio.current.unlocked = false;
+
+    // صداها از همین‌جا ساخته می‌شن؛ هیچ فایلی دانلود نمی‌شه
+    try {
+      audio.current.buffers = buildSounds(ctx);
+    } catch {}
+
+    const EVENTS = ["pointerup", "touchend", "click", "keydown"];
+    const detach = () => EVENTS.forEach((e) => window.removeEventListener(e, unlock, true));
+    function unlock() {
+      // resume باید همین‌جا و هم‌زمان با لمس کاربر صدا زده بشه
+      ctx
+        .resume()
+        .then(() => {
+          if (ctx.state !== "running") return; // هنوز قفله؛ لمس بعدی دوباره تلاش می‌کنه
+          try {
+            const src = ctx.createBufferSource(); // یک نمونه‌ی بی‌صدا؛ iOS رو کامل باز می‌کنه
+            src.buffer = ctx.createBuffer(1, 1, 22050);
+            src.connect(ctx.destination);
+            src.start(0);
+          } catch {}
+          audio.current.unlocked = true;
+          detach();
+        })
+        .catch(() => {});
+    }
+    EVENTS.forEach((e) => window.addEventListener(e, unlock, { capture: true, passive: true }));
+
+    // وقتی برنامه از پس‌زمینه برمی‌گرده، موبایل ممکنه صدا رو suspend کرده باشه
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && ctx.state === "suspended" && audio.current.unlocked) ctx.resume().catch(() => {});
     };
-    window.addEventListener("pointerdown", unlock);
-    window.addEventListener("keydown", unlock);
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
-      window.removeEventListener("pointerdown", unlock);
-      window.removeEventListener("keydown", unlock);
+      detach();
+      document.removeEventListener("visibilitychange", onVisible);
+      ctx.close().catch(() => {});
     };
   }, []);
 
   const play = useCallback((type) => {
     if (!soundRef.current) return;
-    const a = type === "ORDER_NEW" ? audio.current.order : audio.current.notify;
-    if (!a) return;
+    const { ctx, buffers } = audio.current;
+    const buffer = type === "ORDER_NEW" ? buffers.order : buffers.notify;
     try {
-      a.currentTime = 0;
-      a.play().catch(() => {});
+      if (ctx && buffer) {
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+        if (ctx.state === "running") {
+          const src = ctx.createBufferSource();
+          src.buffer = buffer;
+          src.connect(ctx.destination);
+          src.start(0);
+          return;
+        }
+      }
+      // هنوز قفل یا بدون Web Audio: حداقل گوشی بلرزه (روی اندروید)
+      vibrate(type === "ORDER_NEW");
     } catch {}
   }, []);
 
@@ -99,10 +157,33 @@ export function NotificationProvider({ children }) {
     try {
       const data = await api("GET", "/api/notifications");
       data.notifications.forEach((n) => seen.current.add(n.id));
-      setItems(data.notifications);
+      // صفحه‌هایی که کاربر قبلاً پایین‌تر لود کرده نگه داشته می‌شن (مثلاً موقع برگشت به تب)
+      setItems((prev) => mergeById(data.notifications, prev));
       setUnread(data.unread);
+      if (!cursorLoaded.current) {
+        cursorLoaded.current = true;
+        setNextCursor(data.nextCursor ?? null);
+      }
     } catch {}
   }, []);
+
+  // لود تنبل: صفحه‌ی بعدیِ اعلان‌های قدیمی‌تر (با اسکرول تا انتهای لیست صدا زده می‌شه)
+  const loadMore = useCallback(async () => {
+    if (!nextCursor || loadingMoreRef.current) return;
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    try {
+      const data = await api("GET", `/api/notifications?cursor=${encodeURIComponent(nextCursor)}`);
+      data.notifications.forEach((n) => seen.current.add(n.id));
+      setItems((prev) => mergeById(prev, data.notifications));
+      setNextCursor(data.nextCursor ?? null);
+      setUnread(data.unread);
+    } catch {
+    } finally {
+      loadingMoreRef.current = false;
+      setLoadingMore(false);
+    }
+  }, [nextCursor]);
 
   const open = useCallback(
     (n) => {
@@ -132,6 +213,42 @@ export function NotificationProvider({ children }) {
     } catch {}
   }, []);
 
+  // حذف از لیست خودِ کاربر (فوری روی صفحه، بعد سرور؛ اگه سرور خطا داد لیست از نو گرفته می‌شه)
+  const remove = useCallback(
+    async (ids) => {
+      if (!ids?.length) return;
+      const gone = new Set(ids);
+      setItems((list) => list.filter((x) => !gone.has(x.id)));
+      setUnread((c) => {
+        let dec = 0;
+        for (const x of itemsRef.current) if (gone.has(x.id) && !x.readAt) dec += 1;
+        return Math.max(0, c - dec);
+      });
+      try {
+        const data = await api("DELETE", "/api/notifications", { ids });
+        setUnread(data.unread);
+      } catch {
+        cursorLoaded.current = false;
+        load();
+      }
+    },
+    [load],
+  );
+
+  const removeAll = useCallback(async () => {
+    setItems([]);
+    setUnread(0);
+    setNextCursor(null);
+    try {
+      await api("DELETE", "/api/notifications", { all: true });
+    } catch {
+      cursorLoaded.current = false;
+      load();
+    }
+  }, [load]);
+
+  const testSound = useCallback(() => play("ORDER_STATUS"), [play]);
+
   const enable = useCallback(async () => {
     const result = await enablePush();
     setPermission(pushSupported() ? Notification.permission : "unavailable");
@@ -143,7 +260,7 @@ export function NotificationProvider({ children }) {
     (n) => {
       if (seen.current.has(n.id)) return;
       seen.current.add(n.id);
-      setItems((list) => [n, ...list].slice(0, 50));
+      setItems((list) => mergeById([n], list));
       setUnread((c) => c + 1);
       play(n.type);
 
@@ -172,6 +289,8 @@ export function NotificationProvider({ children }) {
     if (!user) {
       setItems([]);
       setUnread(0);
+      setNextCursor(null);
+      cursorLoaded.current = false;
       seen.current = new Set();
       return;
     }
@@ -211,8 +330,24 @@ export function NotificationProvider({ children }) {
   }, [unread]);
 
   const value = useMemo(
-    () => ({ items, unread, soundOn, setSoundOn, permission, enable, markRead, markAllRead, open }),
-    [items, unread, soundOn, setSoundOn, permission, enable, markRead, markAllRead, open],
+    () => ({
+      items,
+      unread,
+      hasMore: nextCursor !== null,
+      loadingMore,
+      loadMore,
+      soundOn,
+      setSoundOn,
+      permission,
+      enable,
+      markRead,
+      markAllRead,
+      remove,
+      removeAll,
+      testSound,
+      open,
+    }),
+    [items, unread, nextCursor, loadingMore, loadMore, soundOn, setSoundOn, permission, enable, markRead, markAllRead, remove, removeAll, testSound, open],
   );
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 }

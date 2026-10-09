@@ -37,7 +37,7 @@ export default function HowItWorks() {
         </h2>
       </Reveal>
 
-      <ol className="grid gap-3 md:grid-cols-3 md:gap-4">
+      <ol className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
         {STEPS.map(({ n, icon: Icon, title, text, from }, i) => (
           <Reveal as="li" key={n} from={from} delay={i * 90} className="relative">
             <div className="relative h-full overflow-hidden rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200/70">

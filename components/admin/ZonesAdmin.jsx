@@ -153,7 +153,7 @@ export default function ZonesAdmin({ initial }) {
       {form && (
         <Card title={form.id ? "ویرایش محدوده" : "محدوده‌ی جدید"} className="mb-4">
           <form onSubmit={submit} noValidate className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="نام محدوده" htmlFor="zName" error={errors.name} required>
                 <input id="zName" value={form.name} onChange={(e) => setField("name", e.target.value)} placeholder="مثلاً تهران" className={inputCls(Boolean(errors.name))} />
               </Field>
@@ -211,7 +211,7 @@ export default function ZonesAdmin({ initial }) {
               </div>
             )}
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Field label="هزینه‌ی ارسال (تومان)" htmlFor="zFee" error={errors.fee} hint="صفر = رایگان">
                 <input id="zFee" type="number" min="0" value={form.fee} onChange={(e) => setField("fee", e.target.value)} className={inputCls(Boolean(errors.fee))} />
               </Field>

@@ -18,7 +18,7 @@ export default async function SalesReportPage({ searchParams }) {
         <RangeTabs basePath="/admin/reports/sales" days={days} />
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="مبلغ فروش" value={formatToman(r.revenue)} hint={`${formatNumber(r.orders)} سفارش معتبر`} icon={FaMoneyBillWave} />
         <StatTile label="میانگین سبد خرید" value={formatToman(r.avgOrder)} tone="sky" icon={FaReceipt} />
         <StatTile label="تخفیف داده‌شده" value={formatToman(r.discount)} tone="amber" icon={FaPercent} />
@@ -31,7 +31,7 @@ export default async function SalesReportPage({ searchParams }) {
         />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card title="فروش روزانه (تومان)" className="lg:col-span-2">
           <DayBars keys={r.keys} values={r.revenueSeries} unit="تومان" />
         </Card>

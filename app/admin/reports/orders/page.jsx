@@ -27,7 +27,7 @@ export default async function OrdersReportPage({ searchParams }) {
         <RangeTabs basePath="/admin/reports/orders" days={days} />
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatTile label="کل سفارش‌ها" value={formatNumber(r.total)} hint="همه‌ی وضعیت‌ها" icon={FaShoppingBag} />
         <StatTile label="تحویل‌شده" value={formatNumber(delivered)} hint={`${pct(delivered)} از کل`} tone="sky" icon={FaCheckCircle} />
         <StatTile label="لغو شده" value={formatNumber(bad)} hint={`${pct(bad)} از کل`} tone="red" icon={FaBan} />
@@ -37,7 +37,7 @@ export default async function OrdersReportPage({ searchParams }) {
         <DayBars keys={r.keys} values={r.series} unit="سفارش" />
       </Card>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card title="به تفکیک وضعیت">
           <HBarList
             tone="violet"

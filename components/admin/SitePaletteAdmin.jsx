@@ -69,7 +69,7 @@ export default function SitePaletteAdmin({ initial }) {
       />
 
       <Card title="انتخاب پالت">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {PALETTES.map((p) => {
             const active = selected === p.id;
             return (

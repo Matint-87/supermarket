@@ -59,7 +59,7 @@ export default function UserForm({ user = null, isSelf = false, onDone, onCancel
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="شماره موبایل" htmlFor="phone" error={errors.phone} required>
           <input
             id="phone"

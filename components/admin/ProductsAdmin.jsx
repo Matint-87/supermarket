@@ -235,7 +235,7 @@ export default function ProductsAdmin({ brands = [], categories, filters, initia
               </label>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="دسته‌بندی" htmlFor="categoryId" error={errors.categoryId} required>
                 <Select
                   id="categoryId"

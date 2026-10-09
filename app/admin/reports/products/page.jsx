@@ -19,13 +19,13 @@ export default async function ProductsReportPage({ searchParams }) {
         <RangeTabs basePath="/admin/reports/products" days={days} />
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatTile label="محصولات فعال" value={formatNumber(r.active)} icon={FaBoxes} />
         <StatTile label="ناموجود" value={formatNumber(r.out)} tone="red" icon={FaTimesCircle} />
         <StatTile label="موجودی کم" value={formatNumber(r.low)} hint={`${formatNumber(LOW_STOCK_THRESHOLD)} عدد یا کمتر`} tone="amber" icon={FaExclamationTriangle} />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card title="پرفروش‌ترین‌ها (تعداد)">
           <HBarList rows={r.byQty.map((p) => ({ label: p.name, value: p.qty, sub: formatToman(p.revenue) }))} />
         </Card>

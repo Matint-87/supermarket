@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   FaBars,
+  FaBullhorn,
   FaChartLine,
   FaChevronDown,
   FaPalette,
@@ -86,6 +87,7 @@ const NAV = [
       { href: "/admin/reports/orders", label: "سفارش‌ها" },
     ],
   },
+  { label: "ارسال پیام به کاربران", icon: FaBullhorn, href: "/admin/notifications" },
   { label: "پالت رنگی سایت", icon: FaPalette, href: "/admin/appearance" },
   { label: "لاگ فعالیت‌ها", icon: FaHistory, href: "/admin/activity-log" },
 ];
@@ -311,7 +313,7 @@ export default function AdminShell({ admin, children }) {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 overflow-x-clip p-3 sm:p-4 md:p-8">
+      <main className="min-w-0 flex-1 overflow-x-clip break-words p-3 sm:p-4 md:p-8">
         {children}
       </main>
     </div>

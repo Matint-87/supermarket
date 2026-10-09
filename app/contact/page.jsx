@@ -22,7 +22,7 @@ export default function ContactPage() {
     <InfoPage title="تماس با ما" intro="برای سؤال، پیگیری سفارش یا بازگشت کالا از راه‌های زیر با ما در ارتباط باشید.">
       <Section title="اطلاعات تماس">
         {rows.length > 0 ? (
-          <ul className="grid gap-3 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {rows.map(({ icon: Icon, label, value, ltr, href }) => (
               <li key={label} className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">

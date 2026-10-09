@@ -45,7 +45,7 @@ export default async function DailyReportPage({ searchParams }) {
 
       <DateRangeFilter title="تاریخ گزارش" defaultToday />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="مبلغ فروش" value={formatToman(r.revenue)} hint={`${formatNumber(r.validOrders)} سفارش معتبر`} icon={FaMoneyBillWave} />
         <StatTile label="میانگین سبد خرید" value={formatToman(r.avgOrder)} tone="sky" icon={FaReceipt} />
         <StatTile
@@ -64,7 +64,7 @@ export default async function DailyReportPage({ searchParams }) {
         />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card title={single ? "ساعت ثبت سفارش (به وقت تهران)" : "فروش روزانه (تومان)"} className="lg:col-span-2">
           {single ? (
             <DayBars keys={r.byHour.map((_, h) => `h${h}`)} values={r.byHour} tone="amber" unit="سفارش" hourLabels />
@@ -109,7 +109,7 @@ export default async function DailyReportPage({ searchParams }) {
         </Card>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card title="وضعیت سفارش‌های ثبت‌شده در این بازه">
           <HBarList
             tone="violet"

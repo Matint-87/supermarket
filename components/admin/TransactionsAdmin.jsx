@@ -139,7 +139,7 @@ export default function TransactionsAdmin({ mode = "ALL", filters, initial, defa
       {cfg.canCreate && showForm && (
         <Card title={cfg.createTitle} className="mb-4">
           <form onSubmit={handleCreate} noValidate className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Field label="کد سفارش (۸ رقمی)" htmlFor="tOrder" error={errors.orderCode} required>
                 <input id="tOrder" dir="ltr" inputMode="numeric" value={form.orderCode} onChange={(e) => setField("orderCode", e.target.value)} className={inputCls(Boolean(errors.orderCode))} />
               </Field>

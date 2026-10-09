@@ -57,7 +57,7 @@ export default function ShippingSettingsForm({ initial }) {
       <form onSubmit={submit} noValidate className="space-y-4">
 
         <Card title="روش‌های ارسال">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Toggle id="post" checked={form.postEnabled} onChange={(v) => setField("postEnabled", v)} title="ارسال با پست" description="ارسال به سراسر کشور" />
             <Toggle id="courier" checked={form.courierEnabled} onChange={(v) => setField("courierEnabled", v)} title="ارسال با پیک" description="تحویل درب منزل با پیک فروشگاه" />
             <Toggle id="pickup" checked={form.pickupEnabled} onChange={(v) => setField("pickupEnabled", v)} title="دریافت حضوری" description="تحویل در فروشگاه" />
@@ -68,7 +68,7 @@ export default function ShippingSettingsForm({ initial }) {
         </Card>
 
         <Card title="هزینه">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="هزینه‌ی پیش‌فرض ارسال (تومان)" htmlFor="defaultFee" error={errors.defaultFee} hint="برای مناطقی که در هیچ محدوده‌ای نیستند. صفر = رایگان">
               <input id="defaultFee" type="number" min="0" value={form.defaultFee} onChange={(e) => setField("defaultFee", e.target.value)} className={inputCls(Boolean(errors.defaultFee))} />
             </Field>
@@ -79,7 +79,7 @@ export default function ShippingSettingsForm({ initial }) {
         </Card>
 
         <Card title="زمان تحویل">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="تهران" htmlFor="tehranTime" error={errors.tehranDeliveryTime}>
               <input id="tehranTime" value={form.tehranDeliveryTime} onChange={(e) => setField("tehranDeliveryTime", e.target.value)} className={inputCls(Boolean(errors.tehranDeliveryTime))} />
             </Field>

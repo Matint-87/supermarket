@@ -76,7 +76,7 @@ export default async function AdminDashboardPage() {
         <Stat label="کاربران" value={formatNumber(userCount)} href="/admin/users" icon={FaUsers} tone="violet" />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card title="آخرین سفارش‌ها">
           {recentOrders.length === 0 ? (
             <p className="py-4 text-center text-xs text-slate-400">هنوز سفارشی ثبت نشده.</p>

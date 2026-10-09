@@ -31,6 +31,7 @@ self.addEventListener("push", (event) => {
         dir: "rtl",
         lang: "fa",
         vibrate: important ? [250, 120, 250, 120, 250] : [200, 100, 200],
+        silent: false,
         requireInteraction: important,
         data: { url: data.url || "/" },
       });

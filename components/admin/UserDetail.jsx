@@ -24,7 +24,7 @@ export default function UserDetail({ user, addresses, initialOrders, isSelf, wal
         <ActiveBadge active={user.isActive} on="فعال" off="مسدود" />
       </PageHeader>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-1">
           <Card title="اطلاعات حساب">
             {editing ? (

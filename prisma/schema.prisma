@@ -94,6 +94,13 @@ enum NotificationType {
   LOW_STOCK // (ادمین) موجودی یک کالا کم شد
   OUT_OF_STOCK // (ادمین) موجودی یک کالا تمام شد
   ORDER_STATUS // (مشتری) وضعیت سفارش عوض شد
+  ADMIN_MESSAGE // (مشتری) پیام دستی ادمین (تکی یا گروهی)
+}
+
+/// مخاطبِ یک پیام دستی ادمین
+enum BroadcastAudience {
+  ALL // همه‌ی مشتری‌های فعال
+  SELECTED // کاربرهای انتخاب‌شده (یک نفر یا چند نفر)
 }
 
 enum OtpPurpose {
@@ -572,12 +579,41 @@ model Notification {
   /// مسیر داخلی که با کلیک روی اعلان باز می‌شه (مثلاً /admin/orders/12345678)
   url   String?
 
-  readAt    DateTime? @map("read_at")
-  createdAt DateTime  @default(now()) @map("created_at")
+  /// اگه این اعلان بخشی از یک پیام دستی ادمین باشه (برای «دو تیک» و حذف از همه)
+  broadcastId String?                @map("broadcast_id") @db.Uuid
+  broadcast   NotificationBroadcast? @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+
+  readAt      DateTime? @map("read_at")
+  /// کاربر اعلان رو از لیست خودش پاک کرده (حذف نرم؛ تا ادمین هنوز وضعیت «خوانده‌شده» رو ببینه)
+  dismissedAt DateTime? @map("dismissed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   @@index([userId, createdAt])
   @@index([userId, readAt])
+  @@index([broadcastId])
   @@map("notifications")
+}
+
+/// یک پیام دستی که ادمین فرستاده؛ به‌ازای هر گیرنده یک Notification داره.
+/// حذفش (از پنل ادمین) اعلان رو از لیست همه‌ی گیرنده‌ها هم پاک می‌کنه (Cascade).
+model NotificationBroadcast {
+  id String @id @default(uuid()) @db.Uuid
+
+  adminId   String? @map("admin_id") @db.Uuid
+  adminName String  @map("admin_name")
+
+  title String
+  body  String
+  url   String?
+
+  audience       BroadcastAudience
+  recipientCount Int               @map("recipient_count")
+
+  createdAt     DateTime       @default(now()) @map("created_at")
+  notifications Notification[]
+
+  @@index([createdAt])
+  @@map("notification_broadcasts")
 }
 
 /// اشتراک Web Push هر دستگاه/مرورگر (هر کاربر می‌تونه چند دستگاه داشته باشه: موبایل، لپ‌تاپ، ...)

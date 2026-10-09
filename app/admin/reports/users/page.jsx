@@ -20,7 +20,7 @@ export default async function UsersReportPage({ searchParams }) {
         <RangeTabs basePath="/admin/reports/users" days={days} />
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="کل کاربران" value={formatNumber(r.totalUsers)} icon={FaUsers} />
         <StatTile label="ثبت‌نام جدید" value={formatNumber(r.newUsers)} tone="sky" icon={FaUserPlus} />
         <StatTile label="خریداران فعال" value={formatNumber(r.buyers)} hint="حداقل یک سفارش معتبر در بازه" tone="violet" icon={FaShoppingCart} />

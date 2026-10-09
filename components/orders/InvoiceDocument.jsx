@@ -49,7 +49,7 @@ export default function InvoiceDocument({ order, buyer, payment, breakAfter = fa
         </header>
 
         {/* فروشنده / خریدار */}
-        <section className="mt-5 grid gap-4 text-xs sm:grid-cols-2">
+        <section className="mt-5 grid grid-cols-1 gap-4 text-xs sm:grid-cols-2">
           <div className="rounded-xl border border-slate-300 p-3">
             <h2 className="mb-1 text-sm font-bold">مشخصات فروشنده</h2>
             <InfoLine label="نام">{STORE_INFO.name}</InfoLine>

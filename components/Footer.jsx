@@ -73,7 +73,7 @@ export default function Footer() {
           ))}
         </ul>
 
-        <Reveal from="bottom" className="grid gap-8 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr_1.2fr]">
+        <Reveal from="bottom" className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr_1.2fr]">
           {/* معرفی */}
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5">

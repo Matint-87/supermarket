@@ -203,7 +203,7 @@ export default function BannersAdmin({ initial }) {
               </div>
             </Field>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="عنوان بنر" htmlFor="bannerTitle" error={errors.title} hint="برای نام‌گذاری در پنل و توضیح عکس برای کاربران نابینا" required>
                 <input
                   id="bannerTitle"

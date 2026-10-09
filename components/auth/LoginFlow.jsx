@@ -6,13 +6,20 @@ import { useRouter } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import BackButton from "@/components/BackButton";
 import { api } from "@/lib/api-client";
-import { OTP_LENGTH } from "@/lib/auth-constants";
+import { OTP_LENGTH, OTP_MAX_PER_DAY, OTP_RESEND_SECONDS, OTP_TTL_SECONDS } from "@/lib/auth-constants";
 import { normalizeMobile, toEnglishDigits, toFaDigits } from "@/lib/phone";
 import { checkPassword } from "@/lib/validators";
 import { Alert, Field, Spinner, btnPrimary, btnSecondary, inputCls } from "@/components/ui/form";
 import { notify, useToastOnChange } from "@/lib/toast";
 import { useAuth } from "./AuthProvider";
 import OtpInput from "./OtpInput";
+
+/** ثانیه → «۰۲:۴۵» با ارقام فارسی */
+function formatClock(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60);
+  const sec = totalSeconds % 60;
+  return toFaDigits(`${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`);
+}
 
 // phone → (password) یا (otp → setPassword)
 export default function LoginFlow({ next = "/" }) {
@@ -24,7 +31,9 @@ export default function LoginFlow({ next = "/" }) {
   const [phone, setPhone] = useState("");
   const [purpose, setPurpose] = useState("LOGIN"); // هدف OTP: ورود/ثبت‌نام یا فراموشی رمز
   const [isNew, setIsNew] = useState(false);
-  const [resendAt, setResendAt] = useState(0);
+  const [resendAt, setResendAt] = useState(0); // زمانی که دکمه‌ی «ارسال مجدد» فعال می‌شه
+  const [expireAt, setExpireAt] = useState(0); // زمانی که کد منقضی می‌شه
+  const [dayLimited, setDayLimited] = useState(false); // سقف ۱۰ بار در روز تمام شده؟
   const [devCode, setDevCode] = useState(null);
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -52,7 +61,8 @@ export default function LoginFlow({ next = "/" }) {
     return () => clearInterval(t);
   }, [step]);
 
-  const secondsLeft = Math.max(0, Math.ceil((resendAt - now) / 1000));
+  const secondsLeft = Math.max(0, Math.ceil((resendAt - now) / 1000)); // تا ارسال مجدد
+  const expiresLeft = Math.max(0, Math.ceil((expireAt - now) / 1000)); // تا انقضای کد
 
   function resetMessages() {
     setError("");
@@ -71,7 +81,9 @@ export default function LoginFlow({ next = "/" }) {
     resetMessages();
     setPurpose(data.purpose ?? "LOGIN");
     setIsNew(Boolean(data.isNew));
-    setResendAt(Date.now() + (data.resendIn ?? 60) * 1000);
+    setResendAt(Date.now() + (data.resendIn ?? OTP_RESEND_SECONDS) * 1000);
+    setExpireAt(Date.now() + (data.expiresIn ?? OTP_TTL_SECONDS) * 1000);
+    setDayLimited(false);
     setNow(Date.now());
     setDevCode(data.devCode ?? null);
     setCode("");
@@ -141,6 +153,10 @@ export default function LoginFlow({ next = "/" }) {
   // ───── OTP ─────
   function verifyCode(value) {
     if (busy) return;
+    if (expiresLeft === 0) {
+      setFieldError("زمان اعتبار کد تمام شده است. کد جدید دریافت کنید");
+      return;
+    }
     if (value.length !== OTP_LENGTH) {
       setFieldError(`کد تأیید ${toFaDigits(OTP_LENGTH)} رقمی است`);
       return;
@@ -161,10 +177,18 @@ export default function LoginFlow({ next = "/" }) {
   function resendCode() {
     run(async () => {
       try {
-        const data = await api("POST", "/api/auth/otp/send", { phone, purpose });
+        // resend: true → سرور فاصله‌ی ۳ دقیقه‌ای رو اعمال می‌کنه
+        const data = await api("POST", "/api/auth/otp/send", { phone, purpose, resend: true });
         beginOtp({ ...data, isNew });
       } catch (err) {
-        if (err.data?.retryAfter) setResendAt(Date.now() + err.data.retryAfter * 1000);
+        const retryAfter = err.data?.retryAfter;
+        if (retryAfter && retryAfter <= OTP_RESEND_SECONDS) {
+          // هنوز از فاصله‌ی ۳ دقیقه‌ای نگذشته → تایمر رو با زمان واقعیِ سرور تنظیم کن
+          setResendAt(Date.now() + retryAfter * 1000);
+        } else if (err.status === 429 && retryAfter) {
+          // سقف روزانه (۱۰ بار) تمام شده
+          setDayLimited(true);
+        }
         throw err;
       }
     });
@@ -352,11 +376,32 @@ export default function LoginFlow({ next = "/" }) {
             تأیید
           </button>
 
-          <div className="text-center text-xs text-slate-500">
-            {secondsLeft > 0 ? (
-              <span>
-                ارسال مجدد کد تا <b className="text-slate-700">{toFaDigits(secondsLeft)}</b> ثانیه دیگر
-              </span>
+          <div className="space-y-2 text-center text-xs text-slate-500">
+            {/* تایمر اعتبار کد (۳ دقیقه) */}
+            {expiresLeft > 0 ? (
+              <p>
+                اعتبار کد:{" "}
+                <b dir="ltr" className="inline-block min-w-10 text-slate-700">
+                  {formatClock(expiresLeft)}
+                </b>
+              </p>
+            ) : (
+              <p className="font-medium text-red-600">زمان اعتبار کد تمام شد. کد جدید دریافت کنید.</p>
+            )}
+
+            {/* ارسال مجدد: بعد از ۳ دقیقه فعال می‌شه؛ حداکثر ۱۰ بار در روز */}
+            {dayLimited ? (
+              <p className="text-red-600">
+                سقف {toFaDigits(OTP_MAX_PER_DAY)} بار دریافت کد در روز تمام شده است. فردا دوباره تلاش کنید.
+              </p>
+            ) : secondsLeft > 0 ? (
+              <p>
+                ارسال مجدد کد تا{" "}
+                <b dir="ltr" className="inline-block min-w-10 text-slate-700">
+                  {formatClock(secondsLeft)}
+                </b>{" "}
+                دیگر
+              </p>
             ) : (
               <button
                 type="button"
